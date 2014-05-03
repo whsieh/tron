@@ -99,7 +99,6 @@ module Engine {
 
     }
 
-    var counter: number = 10;
 
     var zaxis: Vector3 = new Vector3(0, 0, 1);
     //Calculate the new position in coarse grid given current position (in coarse grid), orientation
@@ -108,9 +107,6 @@ module Engine {
         var distance: number = SPEED * dt;    //Distance traveled in dt milliseconds in coarse grid
         var pos: Point = player.curPos;
         var dir: Vector3 = player.dir;
-        if (counter < 10)
-            console.log("   current Pos: (" + pos.x + ", " + pos.y + "), dir: (" + dir.x +
-                ", " + dir.y + "), dt: " + dt);
         player.dir.applyAxisAngle(zaxis, player.curTheta);
         return {x: pos.x + distance * dir.x, y: pos.y + distance * dir.y};
     }
@@ -122,21 +118,8 @@ module Engine {
         if (Math.abs(delta) > tolerance) {
             var direction: number = (delta >= 0)? 1 : -1;
             delta = Math.abs(delta);
-            if (counter < 10) {
-                console.log("        min stuff: " + Math.min(delta, DELTA_THETA * dt))
-                }
             delta = direction * Math.min(delta, DELTA_THETA * dt);
-            if (counter < 10) {
-                console.log("normalized theta: " + player.normalizedTheta + ", delta: " + delta +
-                ", curTheta: " + player.curTheta + ", dir: (" + player.dir.x + ", " + player.dir.y);
-                console.log("   DELTA_THETA*dt: " + DELTA_THETA * dt);
-
-            }
             player.curTheta += delta;
-
-            if (counter < 10)
-                console.log("   new curTheta: " + player.curTheta + ", new dir: (" + player.dir.x +
-                    ", " + player.dir.y);
         }
     }
 
@@ -236,9 +219,6 @@ module Engine {
         //Get player input for player 0 and update its normalized theta
         if (!gameState.players[0].isDead) {
             gameState.players[0].normalizedTheta = (<any> getNormalizedTheta) ();
-            if (isNaN(gameState.players[0].normalizedTheta)) {
-                console.log("FDBGFRHFDSGGNGDFGFGDGFBGFDSFGN");
-            }
         }
 
         //Update the normalized theta for all other players
@@ -258,18 +238,15 @@ module Engine {
             updateDir(player, dt);
             nextPos = move(player, dt);
 
-            if (counter++ < 10)
-                console.log("current pos: (" + player.curPos.x + ", " + player.curPos.y + ") -> next pos: (" + nextPos.x + ", " + nextPos.y + ")");
-
-            // line = getLine(scaleToFine(player.curPos), scaleToFine(nextPos));
-            // for (var j = 0; j < line.length; j++) {
-            //     if (collide(line[j])) {
-            //         gameState.recentlyDead.push(i);
-            //         break;
-            //     } else {
-            //         addObstacle(i, line[j]);
-            //     }
-            // }
+            line = getLine(scaleToFine(player.curPos), scaleToFine(nextPos));
+            for (var j = 0; j < line.length; j++) {
+                if (collide(line[j])) {
+                    gameState.recentlyDead.push(i);
+                    break;
+                } else {
+                    addObstacle(i, line[j]);
+                }
+            }
 
             var len:number = gameState.recentlyDead.length;
             if (len == 0 || gameState.recentlyDead[len-1] != i) {
