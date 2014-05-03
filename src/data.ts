@@ -13,6 +13,8 @@ module Data {
     }
 
     export class GameState {
+        width: number;
+        height: number;
         numPlayers : number;
         players : Player[];
         recentlyDead : number[];
