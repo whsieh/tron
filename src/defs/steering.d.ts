@@ -1,3 +1,7 @@
+interface StartSteering {
+    (): void;
+}
+
 interface GetNormalizedTheta {
     (): number;
 }

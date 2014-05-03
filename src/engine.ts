@@ -29,7 +29,7 @@ module Engine {
     function newPoint(X: number, Y: number): Point {
         return {x: X, y: Y};
     }
-    
+
     // Return a random starting position and orientation for a player.
     function randomStart(): {pos: Point; dir: Vector3} {
         //stub for now, change later
@@ -104,7 +104,6 @@ module Engine {
         return {x: pos.x + distance * dir.x, y: pos.y + distance * dir.y};
     }
 
-
     var zaxis: Vector3 = new Vector3(0, 0, 1);
     var tolerance: number = DELTA_THETA / 2;
     function updateDir(player: Player, dt: number): void {
@@ -174,7 +173,7 @@ module Engine {
         var y: number = y0;
 
         var xa: number;
-        var ya: number  
+        var ya: number
         var res: Point[] = new Array<Point> ();
         for (var x = x0; x <= x1; x++){
             if (steep) {
@@ -209,7 +208,7 @@ module Engine {
         start = timestamp;
 
         //Clear recently dead
-        gameState.recentlyDead.length = 0; 
+        gameState.recentlyDead.length = 0;
 
         //Get player input for player 0 and update its normalized theta
         if (!gameState.players[0].isDead)
@@ -262,15 +261,19 @@ module Engine {
                 numPlayerAlive++;
         }
 
-        if (numPlayerAlive > 1)
+        if (numPlayerAlive >= 1)
             graphicEngine.render();
         else
             graphicEngine.gameOver();
         requestAnimationFrame(step);
    }
 
-   initialize(1);
-   requestAnimationFrame(step);
+    $(document).ready(function() {
+        var startSteering: StartSteering;
+        startSteering();
+        initialize(1);
+        requestAnimationFrame(step);
+    });
 }
 
 

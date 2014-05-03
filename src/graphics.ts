@@ -47,15 +47,19 @@ module Graphics {
             // Setup Scene and Canvas Element
             this.camera = new THREE.PerspectiveCamera(75, $(window).width() / $(window).height(),
                 0.1, 1000);
+            this.camera.position.z = 25;
+            this.camera.up.set(0, 0, 1);
             this.renderer = new THREE.WebGLRenderer();
             this.renderer.setSize($(window).width(), $(window).height());
-            document.body.appendChild($(this.renderer.domElement).attr("id", CANVAS_ID)[0]);
+            $(document.body).prepend($(this.renderer.domElement).attr("id", CANVAS_ID)[0]);
 
             // Callbacks
             $(window).resize(function() {
-                this.renderer.setSize($(window).width(), $(window).height());
-                this.camera.aspect = $(window).width() / $(window).height();
-                this.camera.updateProjectionMatrix();
+                if (this.renderer != null && this.camera != null) {
+                    this.renderer.setSize($(window).width(), $(window).height());
+                    this.camera.aspect = $(window).width() / $(window).height();
+                    this.camera.updateProjectionMatrix();
+                }
             });
 
             // Initialize Map and Players
@@ -77,7 +81,7 @@ module Graphics {
         }
 
         gameOver(): void {
-            // fixme
+            alert("Game Over");
         }
 
         private initializeMap(): void {
@@ -131,10 +135,14 @@ module Graphics {
             for (var i = 0; i < this.state.players.length; i++) {
                 player = this.state.players[i];
                 if (!player.isDead) {
+
                     // If player still alive, render!
                     pos = player.curPos;
                     dir = player.dir;
-                    normalizedTheta = player.normalizedTheta;
+
+                    console.log("player at    : " + pos.x + ", " + pos.y);
+                    console.log("player lookat: " + dir.x + ", " + dir.y);
+                    normalizedTheta = player    .normalizedTheta;
 
                     // Place player in the right position
                     this.players[i].position.x = pos.x;

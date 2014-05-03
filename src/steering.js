@@ -1,4 +1,8 @@
-$(document).ready(function() {
+var getNormalizedTheta;
+var startSteeringLoop;
+var stopSteeringLoop;
+
+var startSteering = function() {
     console.log("+ Loading steering.js...")
 
     var video = document.querySelector("video");
@@ -51,18 +55,18 @@ $(document).ready(function() {
                             navigator.mozGetUserMedia ||
                             navigator.msGetUserMedia;
 
-    function getNormalizedTheta() {
+    getNormalizedTheta = function() {
         return ((theta1 / MAX_THETA) + (theta2 / MAX_THETA) + (theta3 / MAX_THETA)) / 3;
     }
 
-    function startSteeringLoop(pollFreq) {
+    startSteeringLoop = function(pollFreq) {
         if (pollFreq == undefined) {
             pollFreq = DFLT_POLL_FREQ;
         }
         loopNo = setInterval(__snapshot, pollFreq);
     }
 
-    function stopSteeringLoop() {
+    stopSteeringLoop = function() {
         if (loopNo != -1)
             clearInterval(loopNo);
         loopNo = -1;
@@ -89,8 +93,8 @@ $(document).ready(function() {
                     }
                     __updateTheta(lastKnownLHand, lastKnownRHand);
                 }
-                console.log("getNormalizedTheta() = " + getNormalizedTheta());
-                console.log("  + Image taken.");
+                // console.log("getNormalizedTheta() = " + getNormalizedTheta());
+                // console.log("  + Image taken.");
                 // __pause();
             }
         }, 100);
@@ -332,4 +336,4 @@ $(document).ready(function() {
     }, function(e) {
         console.log("WEBCAM REJECTED OH NOES", e);
     });
-});
+}
