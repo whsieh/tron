@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title></title>
+    <script src="lib/jquery.min.js"></script>
+</head>
+<body>
+    <video id="webcam-video" width="100" height="100" autoplay></video>
+    <canvas id="real-canv" width="100" height="100" id="webcam-canvas"></canvas>
+
+    <p>SPACE to record skin color and continue...</p>
+
+    <script src="steering-init.js"></script>
+    <script type="text/javascript">
+    window.onkeydown = function(evt) {
+        if (evt.keyCode == 32) {
+            // captured a space
+            setTimeout(function() {
+                updateSkinColor();
+                setTimeout(function() {
+                    window.location.replace("http://localhost:8000/main.html?r=" +
+                    skinColor[0] + "g=" + skinColor[1] + "b=" + skinColor[2]);
+                }, 1000)
+            }, 500);
+        }
+    }
+    </script>
+</body>
+</html>
