@@ -1,7 +1,7 @@
 /// <reference path="./references.ts" />
 module Data {
-    export WIDTH = 1000;
-    export HEIGHT = 1000;
+    export var WIDTH: number = 1000;
+    export var HEIGHT: number = 1000;
 
     export interface Point {
         x: number;
