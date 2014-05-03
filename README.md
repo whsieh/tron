@@ -13,7 +13,7 @@ Steering:
         // number on the interval [-1, 1]
         getNormalizedTheta(): number;
 
-Graphics:
+Data:
 
     class GameState:
 
@@ -27,6 +27,9 @@ Graphics:
         normalizedTheta: number;
         isDead: boolean;
         trail: Point[];
+
+
+Graphics:
 
     class Engine:
 
