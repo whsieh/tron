@@ -17,7 +17,9 @@ module Engine {
     var obstacles = {};         //The grid for obstacles is on a finer scale than that for player pos
     var gameState: GameState;
     var graphicEngine: Graphics.Engine;
-    var getNormalizedTheta: GetNormalizedTheta;
+    var startSteering;
+    var startSteeringLoop;
+    var getNormalizedTheta;
 
     function degreeToRadian(deg: number): number {
         return deg * Math.PI / 180;
@@ -84,8 +86,7 @@ module Engine {
     function initialize(numPlayers: number) {
         gameState = newGameState(numPlayers);
         graphicEngine = new Graphics.Engine(gameState);
-        var startSteeringLoop: StartSteeringLoop;
-        startSteeringLoop();
+        (<any> startSteeringLoop) ();
 
         //Add the starting position of each player to obstacles
         var player: Player;
@@ -212,7 +213,7 @@ module Engine {
 
         //Get player input for player 0 and update its normalized theta
         if (!gameState.players[0].isDead)
-            gameState.players[0].normalizedTheta = getNormalizedTheta();
+            gameState.players[0].normalizedTheta = (<any> getNormalizedTheta) ();
 
         //Update the normalized theta for all other players
         for (var i = 1; i < gameState.numPlayers; i++) {
@@ -269,8 +270,7 @@ module Engine {
    }
 
     $(document).ready(function() {
-        var startSteering: StartSteering;
-        startSteering();
+        (<any> startSteering) ();
         initialize(1);
         requestAnimationFrame(step);
     });
