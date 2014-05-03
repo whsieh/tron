@@ -27,6 +27,7 @@ Data:
         normalizedTheta: number;
         isDead: boolean;
         trail: Point[];
+        lookAt: Point;  // The direction vector a player is facing
 
 
 Graphics:

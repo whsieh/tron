@@ -10,6 +10,7 @@ module Data {
         normalizedTheta : number;
         isDead : boolean;
         trail : Point[];
+        lookAt: Point;
     }
 
     export class GameState {
