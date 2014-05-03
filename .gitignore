@@ -3,3 +3,4 @@
 
 # Compiled Files
 build/*
+node_modules/*
