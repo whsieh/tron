@@ -134,6 +134,8 @@ module Graphics {
                 this.players[i] = new THREE.Mesh(geometry, material);
                 this.players[i].position.z = HOVER_HEIGHT + PLAYER_HEIGHT;
                 this.players[i].up.set(0, 0, 1);
+
+                this.scene.add(this.players[i]);
             }
         }
 
@@ -163,9 +165,9 @@ module Graphics {
                     this.players[i].lookAt(v3(pos.x + dir.x * 50, pos.y + dir.y * 50,
                         PLAYER_HEIGHT + HOVER_HEIGHT - 8));
 
-                    this.scene.add(this.players[i]);
-
-                    console.log(normalizedTheta);
+                    // console.log(normalizedTheta);
+                    //console.log("Position: (" + pos.x + ", " + pos.y + "), dir: (" + dir.x + ", " +
+                    //    dir.y + "), turning: " + player.curThetag);
                 }
             }
         }

@@ -15,8 +15,8 @@ module Engine {
     var FINE_SCALE: number = 4; //The scaling of finer grid used for collision compared to the grid
                                 //used for graphic
     var SPEED: number = 1.6 / TIMESTEP;   //The speed of all player in coarse grid per millisecond.
-    var DELTA_THETA = 6 / TIMESTEP;       //Turning speed in degree per millisecond.
-    var MAX_THETA = 60 / TIMESTEP;        //The maximum degree a player can turn in one millisecond.
+    var DELTA_THETA = 0.5 / TIMESTEP;       //Turning speed in degree per millisecond.
+    var MAX_THETA = 15;                     //The maximum degree a player can turn.
 
     var obstacles = {};         //The grid for obstacles is on a finer scale than that for player pos
     var gameState: GameState;
@@ -99,23 +99,44 @@ module Engine {
 
     }
 
+    var counter: number = 10;
+
+    var zaxis: Vector3 = new Vector3(0, 0, 1);
     //Calculate the new position in coarse grid given current position (in coarse grid), orientation
     //and time elapsed.
-    function move(pos: Point, dir: Vector3, dt: number): Point {
+    function move(player: Player, dt: number): Point {
         var distance: number = SPEED * dt;    //Distance traveled in dt milliseconds in coarse grid
+        var pos: Point = player.curPos;
+        var dir: Vector3 = player.dir;
+        if (counter < 10)
+            console.log("   current Pos: (" + pos.x + ", " + pos.y + "), dir: (" + dir.x +
+                ", " + dir.y + "), dt: " + dt);
+        player.dir.applyAxisAngle(zaxis, player.curTheta);
         return {x: pos.x + distance * dir.x, y: pos.y + distance * dir.y};
     }
 
-    var zaxis: Vector3 = new Vector3(0, 0, 1);
     var tolerance: number = DELTA_THETA / 2;
     function updateDir(player: Player, dt: number): void {
         var intendedTurn: number = player.normalizedTheta * MAX_THETA;
         var delta: number = intendedTurn - player.curTheta;
         if (Math.abs(delta) > tolerance) {
             var direction: number = (delta >= 0)? 1 : -1;
+            delta = Math.abs(delta);
+            if (counter < 10) {
+                console.log("        min stuff: " + Math.min(delta, DELTA_THETA * dt))
+                }
             delta = direction * Math.min(delta, DELTA_THETA * dt);
+            if (counter < 10) {
+                console.log("normalized theta: " + player.normalizedTheta + ", delta: " + delta +
+                ", curTheta: " + player.curTheta + ", dir: (" + player.dir.x + ", " + player.dir.y);
+                console.log("   DELTA_THETA*dt: " + DELTA_THETA * dt);
+
+            }
             player.curTheta += delta;
-            player.dir.applyAxisAngle(zaxis, delta);
+
+            if (counter < 10)
+                console.log("   new curTheta: " + player.curTheta + ", new dir: (" + player.dir.x +
+                    ", " + player.dir.y);
         }
     }
 
@@ -205,7 +226,7 @@ module Engine {
    var start: number = null;
    function step(timestamp: number) {
         var dt: number;
-        if (start) start = timestamp;
+        if (start == null) start = timestamp;
         dt = timestamp - start;
         start = timestamp;
 
@@ -213,8 +234,12 @@ module Engine {
         gameState.recentlyDead.length = 0;
 
         //Get player input for player 0 and update its normalized theta
-        if (!gameState.players[0].isDead)
+        if (!gameState.players[0].isDead) {
             gameState.players[0].normalizedTheta = (<any> getNormalizedTheta) ();
+            if (isNaN(gameState.players[0].normalizedTheta)) {
+                console.log("FDBGFRHFDSGGNGDFGFGDGFBGFDSFGN");
+            }
+        }
 
         //Update the normalized theta for all other players
         for (var i = 1; i < gameState.numPlayers; i++) {
@@ -225,12 +250,16 @@ module Engine {
         var line: Point[];
         var player: Player;
         var nextPos: Point;
+
         for (var i = 0; i < gameState.numPlayers; i++) {
             player = gameState.players[i];
             if (player.isDead)
                 continue;
             updateDir(player, dt);
-            nextPos = move(player.curPos, player.dir, dt);
+            nextPos = move(player, dt);
+
+            if (counter++ < 10)
+                console.log("current pos: (" + player.curPos.x + ", " + player.curPos.y + ") -> next pos: (" + nextPos.x + ", " + nextPos.y + ")");
 
             // line = getLine(scaleToFine(player.curPos), scaleToFine(nextPos));
             // for (var j = 0; j < line.length; j++) {
