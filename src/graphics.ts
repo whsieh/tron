@@ -185,185 +185,153 @@ module Graphics {
         }
     }
 
-    function test() {
-        $("document").ready(function() {
-            // Setup scene
-            var scene = new THREE.Scene();
-            var camera = new THREE.PerspectiveCamera( 75, $(window).width() / $(window).height(),
-            0.1, 1000 );
-
-            var renderer = new THREE.WebGLRenderer();
-            renderer.setSize( $(window).width(), $(window).height() );
-            document.body.appendChild( $(renderer.domElement).attr("id", CANVAS_ID)[0] );
-
-            $(window).resize(function() {
-                renderer.setSize( $(window).width(), $(window).height() );
-                camera.aspect = $(window).width() / $(window).height();
-                camera.updateProjectionMatrix();
-                renderer.render(scene, camera);
-            });
-
-            // Create
-            (function() {
-                var material = new THREE.LineBasicMaterial({color: 0x00ff00});
-                var geometry = new THREE.Geometry();
-                for (var i = 0; i <= Data.WIDTH; i += 50) {
-                    geometry.vertices.push(v3(i, 0, 0));
-                    geometry.vertices.push(v3(i, Data.HEIGHT, 0));
-                }
-
-                for (var j = 0; j <= Data.HEIGHT; j+= 50) {
-                    geometry.vertices.push(v3(0, j, 0));
-                    geometry.vertices.push(v3(Data.WIDTH, j, 0));
-                }
-
-                var line = new THREE.Line(geometry, material, THREE.LinePieces);
-                scene.add( line );
-            })();
-
-            // Player position
-            var player;
-            var x = Data.WIDTH / 2;
-            var y = Data.HEIGHT / 2;
-            var prevx = x;
-            var prevy = y;
-            var dir = v3(0, 1, 0);
-
-            // Camera
-            camera.position.z = 25;
-            camera.up = v3(0, 0, 1);
-
-            // One player
-            var geometry = new THREE.Geometry();
-            geometry = new THREE.Geometry();
-            geometry.vertices.push(v3(0, 0, 0));
-            geometry.vertices.push(v3(6, 0, -20.9));
-            geometry.vertices.push(v3(-6, 0, -20.9));
-            geometry.vertices.push(v3(-6, -PLAYER_HEIGHT, -20));
-            geometry.vertices.push(v3(6, -PLAYER_HEIGHT, -20));
-
-            geometry.faces.push(new THREE.Face3(0, 1, 2));
-            geometry.faces.push(new THREE.Face3(0, 4, 1));
-            geometry.faces.push(new THREE.Face3(0, 2, 3));
-            geometry.faces.push(new THREE.Face3(4, 3, 2));
-            geometry.faces.push(new THREE.Face3(4, 2, 1));
-
-            var material = new THREE.MeshBasicMaterial({
-                color: COLORS[0],
-                wireframe: true,
-                wireframeLinewidth: 3
-            });
-
-            player = new THREE.Mesh(geometry, material);
-            player.position.z = 10;
-            player.up.set(0, 0, 1);
-
-            scene.add(player);
-
-            // Update
-
-            // player.position.x = x;
-            // player.position.y = y;
-            // player.lookAt(v3(x + dir.x * 50, y + dir.y * 50, player.position.z - 8));
-
-            function update() {
-                dir.normalize();
-                player.position.x = x;
-                player.position.y = y;
-                player.lookAt(v3(x + dir.x * 50, y + dir.y * 50, player.position.z - 8));
-
-                camera.position.x = x - dir.x * 50;
-                camera.position.y = y - dir.y * 50;
-                camera.lookAt(v3(x + dir.x * 50, y + dir.y * 50, 0));
-                camera.updateProjectionMatrix();
-
-                // Add trail
-                if (prevx != x || prevy != y) {
-                    var geometry = new THREE.Geometry();
-                    var material = new THREE.MeshBasicMaterial({color: COLORS[0] + 0x01010});
-                    material.side = THREE.DoubleSide;
-                    geometry.vertices.push(v3(prevx, prevy, HOVER_HEIGHT));
-                    geometry.vertices.push(v3(prevx, prevy, PLAYER_HEIGHT + HOVER_HEIGHT));
-                    geometry.vertices.push(v3(x, y, HOVER_HEIGHT));
-                    geometry.vertices.push(v3(x, y, PLAYER_HEIGHT + HOVER_HEIGHT));
-
-                    geometry.faces.push(new THREE.Face3(0, 1, 2));
-                    geometry.faces.push(new THREE.Face3(1, 2, 3));
-                }
-
-                scene.add(new THREE.Mesh(geometry, material));
-            }
-
-            update();
-
-            // Render
-            var render = function () {
-                requestAnimationFrame(render);
-                renderer.render(scene, camera);
-            };
-
-            // Arrow keys
-            $(document).keydown(function(e){
-                dir.setLength(10);
-                if (e.keyCode == 37) {
-                    // left
-                    dir.applyAxisAngle(v3(0, 0, 1), 0.104719755);
-                } else if (e.keyCode == 38) {
-                    // up
-                    prevx = x;
-                    prevy = y;
-                    x += dir.x;
-                    y += dir.y;
-                } else if (e.keyCode == 39) {
-                    // right
-                    dir.applyAxisAngle(v3(0, 0, 1), -0.104719755);
-                } else if (e.keyCode == 40) {
-                    // down
-                    prevx = x;
-                    prevy = y;
-                    x -= dir.x;
-                    y -= dir.y;
-                }
-                update();
-
-                return false;
-            });
-
-            render();
-        });
-    }
-
     // function test() {
     //     $("document").ready(function() {
+    //         // Setup scene
     //         var scene = new THREE.Scene();
-    //         var camera = new THREE.PerspectiveCamera(75, window.innerWidth/window.innerHeight, 0.1, 1000);
+    //         var camera = new THREE.PerspectiveCamera( 75, $(window).width() / $(window).height(),
+    //         0.1, 1000 );
 
     //         var renderer = new THREE.WebGLRenderer();
-    //         renderer.setSize(window.innerWidth, window.innerHeight);
-    //         document.body.appendChild(renderer.domElement);
+    //         renderer.setSize( $(window).width(), $(window).height() );
+    //         document.body.appendChild( $(renderer.domElement).attr("id", CANVAS_ID)[0] );
 
+    //         $(window).resize(function() {
+    //             renderer.setSize( $(window).width(), $(window).height() );
+    //             camera.aspect = $(window).width() / $(window).height();
+    //             camera.updateProjectionMatrix();
+    //             renderer.render(scene, camera);
+    //         });
+
+    //         // Create
+    //         (function() {
+    //             var material = new THREE.LineBasicMaterial({color: 0x00ff00});
+    //             var geometry = new THREE.Geometry();
+    //             for (var i = 0; i <= Data.WIDTH; i += 50) {
+    //                 geometry.vertices.push(v3(i, 0, 0));
+    //                 geometry.vertices.push(v3(i, Data.HEIGHT, 0));
+    //             }
+
+    //             for (var j = 0; j <= Data.HEIGHT; j+= 50) {
+    //                 geometry.vertices.push(v3(0, j, 0));
+    //                 geometry.vertices.push(v3(Data.WIDTH, j, 0));
+    //             }
+
+    //             var line = new THREE.Line(geometry, material, THREE.LinePieces);
+    //             scene.add( line );
+    //         })();
+
+    //         // Player position
+    //         var player;
+    //         var x = Data.WIDTH / 2;
+    //         var y = Data.HEIGHT / 2;
+    //         var prevx = x;
+    //         var prevy = y;
+    //         var dir = v3(0, 1, 0);
+
+    //         // Camera
+    //         camera.position.z = 25;
+    //         camera.up = v3(0, 0, 1);
+
+    //         // One player
     //         var geometry = new THREE.Geometry();
+    //         geometry = new THREE.Geometry();
     //         geometry.vertices.push(v3(0, 0, 0));
-    //         geometry.vertices.push(v3(10, 0, -40));
-    //         geometry.vertices.push(v3(-10, 0, -40));
-    //         geometry.faces.push(new THREE.Face3(0, 1, 2));
+    //         geometry.vertices.push(v3(6, 0, -20.9));
+    //         geometry.vertices.push(v3(-6, 0, -20.9));
+    //         geometry.vertices.push(v3(-6, -PLAYER_HEIGHT, -20));
+    //         geometry.vertices.push(v3(6, -PLAYER_HEIGHT, -20));
 
-    //         var material = new THREE.MeshBasicMaterial({color: COLORS[0]});
-    //         var player = new THREE.Mesh(geometry, material);
+    //         geometry.faces.push(new THREE.Face3(0, 1, 2));
+    //         geometry.faces.push(new THREE.Face3(0, 4, 1));
+    //         geometry.faces.push(new THREE.Face3(0, 2, 3));
+    //         geometry.faces.push(new THREE.Face3(4, 3, 2));
+    //         geometry.faces.push(new THREE.Face3(4, 2, 1));
+
+    //         var material = new THREE.MeshBasicMaterial({
+    //             color: COLORS[0],
+    //             wireframe: true,
+    //             wireframeLinewidth: 3
+    //         });
+
+    //         player = new THREE.Mesh(geometry, material);
+    //         player.position.z = 10;
+    //         player.up.set(0, 0, 1);
+
     //         scene.add(player);
 
-    //         camera.position.z = 100;
-    //         player.up = (v3(0, 0, 1));
-    //         player.lookAt(v3(0, 1, 0));
+    //         // Update
 
+    //         // player.position.x = x;
+    //         // player.position.y = y;
+    //         // player.lookAt(v3(x + dir.x * 50, y + dir.y * 50, player.position.z - 8));
+
+    //         function update() {
+    //             dir.normalize();
+    //             player.position.x = x;
+    //             player.position.y = y;
+    //             player.lookAt(v3(x + dir.x * 50, y + dir.y * 50, player.position.z - 8));
+
+    //             camera.position.x = x - dir.x * 50;
+    //             camera.position.y = y - dir.y * 50;
+    //             camera.lookAt(v3(x + dir.x * 50, y + dir.y * 50, 0));
+    //             camera.updateProjectionMatrix();
+
+    //             // Add trail
+    //             if (prevx != x || prevy != y) {
+    //                 var geometry = new THREE.Geometry();
+    //                 var material = new THREE.MeshBasicMaterial({color: COLORS[0] + 0x01010});
+    //                 material.side = THREE.DoubleSide;
+    //                 geometry.vertices.push(v3(prevx, prevy, HOVER_HEIGHT));
+    //                 geometry.vertices.push(v3(prevx, prevy, PLAYER_HEIGHT + HOVER_HEIGHT));
+    //                 geometry.vertices.push(v3(x, y, HOVER_HEIGHT));
+    //                 geometry.vertices.push(v3(x, y, PLAYER_HEIGHT + HOVER_HEIGHT));
+
+    //                 geometry.faces.push(new THREE.Face3(0, 1, 2));
+    //                 geometry.faces.push(new THREE.Face3(1, 2, 3));
+    //             }
+
+    //             scene.add(new THREE.Mesh(geometry, material));
+    //         }
+
+    //         update();
+
+    //         // Render
     //         var render = function () {
     //             requestAnimationFrame(render);
     //             renderer.render(scene, camera);
     //         };
 
+    //         // Arrow keys
+    //         $(document).keydown(function(e){
+    //             dir.setLength(10);
+    //             if (e.keyCode == 37) {
+    //                 // left
+    //                 dir.applyAxisAngle(v3(0, 0, 1), 0.104719755);
+    //             } else if (e.keyCode == 38) {
+    //                 // up
+    //                 prevx = x;
+    //                 prevy = y;
+    //                 x += dir.x;
+    //                 y += dir.y;
+    //             } else if (e.keyCode == 39) {
+    //                 // right
+    //                 dir.applyAxisAngle(v3(0, 0, 1), -0.104719755);
+    //             } else if (e.keyCode == 40) {
+    //                 // down
+    //                 prevx = x;
+    //                 prevy = y;
+    //                 x -= dir.x;
+    //                 y -= dir.y;
+    //             }
+    //             update();
+
+    //             return false;
+    //         });
+
     //         render();
     //     });
     // }
 
-    test();
+    // test();
 }
