@@ -1,11 +1,11 @@
-interface getNormalizedTheta {
+interface GetNormalizedTheta {
     (): number;
 }
 
-interface startSteeringLoop {
+interface StartSteeringLoop {
     (pollFreq?: number): void;
 }
 
-interface stopSteeringLoop {
+interface StopSteeringLoop {
     (): void;
 }
