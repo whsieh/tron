@@ -10,20 +10,19 @@ if (fakecanv != null)
 var localMediaStream = null;
 var imageData = null;
 
-var DRAW_CANVAS = false;
+var DRAW_CANVAS = true;
 
 var CAM_WIDTH = realcanv.getBoundingClientRect().width;
 var CAM_HEIGHT = realcanv.getBoundingClientRect().height;
 var POLL_GAP = 10;
 var VOXEL_WIDTH = CAM_WIDTH / POLL_GAP;
 var VOXEL_HEIGHT = CAM_HEIGHT / POLL_GAP;
-var THRESHOLD = 500;
+var THRESHOLD = 1000;
 var MAX_THETA = 1.25;
 var MIN_THETA = -1.25;
 var DFLT_POLL_FREQ = 250;
 var loopNo = -1;
 
-var theta = 0;
 var lastKnownLHand = null;
 var lastKnownRHand = null;
 
@@ -31,6 +30,10 @@ var voxelMap = []
 for (var i = 0; i < VOXEL_HEIGHT; i++) {
     voxelMap.push(Array(VOXEL_WIDTH))
 }
+
+var theta1 = 0
+var theta2 = 0
+var theta3 = 0
 
 var skinColorStart = window.location.href.indexOf("?");
 if (skinColorStart != -1) {
@@ -49,7 +52,7 @@ navigator.getUserMedia = navigator.getUserMedia ||
                         navigator.msGetUserMedia;
 
 function getNormalizedTheta() {
-    return theta / MAX_THETA;
+    return ((theta1 / MAX_THETA) + (theta2 / MAX_THETA) + (theta3 / MAX_THETA)) / 3;
 }
 
 function startSteeringLoop(pollFreq) {
@@ -88,7 +91,7 @@ function __snapshot() {
             }
             console.log("getNormalizedTheta() = " + getNormalizedTheta());
             console.log("  + Image taken.");
-            __pause();
+            // __pause();
         }
     }, 100);
 }
@@ -261,11 +264,18 @@ function __findHandPositions(voxelMap) {
 }
 
 function __updateTheta(lhand, rhand) {
-    var mid = { "x": (lhand.x + rhand.x) / 2,
-                "y": (lhand.y + rhand.y) / 2}
-    var sgn = lhand.y > rhand.y ? -1 : 1;
-    var th = sgn * Math.asin(Math.abs(mid.y - rhand.y) / Math.abs(mid.x - rhand.x));
-    theta = Math.max(Math.min(th, MAX_THETA), MIN_THETA);
+    if (lhand != null && rhand != null) {
+        var mid = { "x": (lhand.x + rhand.x) / 2,
+                    "y": (lhand.y + rhand.y) / 2}
+        var sgn = lhand.y > rhand.y ? -1 : 1;
+        var th = sgn * Math.asin(Math.abs(mid.y - rhand.y) / Math.abs(mid.x - rhand.x));
+        if (isNaN(th)) {
+            th = theta1;
+        }
+        theta3 = theta2;
+        theta2 = theta1;
+        theta1 = Math.max(Math.min(th, MAX_THETA), MIN_THETA);
+    }
 }
 
 function __drawImageData() {
