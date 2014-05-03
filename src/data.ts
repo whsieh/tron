@@ -1,5 +1,8 @@
 /// <reference path="./references.ts" />
 module Data {
+    export WIDTH = 1000;
+    export HEIGHT = 1000;
+
     export interface Point {
         x: number;
         y: number;
@@ -14,8 +17,6 @@ module Data {
     }
 
     export class GameState {
-        width: number;
-        height: number;
         numPlayers : number;
         players : Player[];
         recentlyDead : number[];
