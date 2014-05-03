@@ -13,7 +13,7 @@ module Data {
         normalizedTheta : number;
         isDead : boolean;
         trail : Point[];
-        lookAt: Point;
+        dir: THREE.Vector3;
     }
 
     export class GameState {
