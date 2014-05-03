@@ -24,6 +24,7 @@ Data:
     class Player:
 
         curPos: Point;
+        curTheta: number;
         normalizedTheta: number;
         isDead: boolean;
         trail: Point[];
