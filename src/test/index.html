@@ -1,0 +1,22 @@
+
+
+<script src="jquery.js"></script>
+
+<video id="webcam-video" width="200" height="200" autoplay></video>
+<canvas id="real-canv" width="200" height="200" id="webcam-canvas"></canvas>
+
+<script src="steering-init.js"></script>
+<script type="text/javascript">
+window.onkeydown = function(evt) {
+    if (evt.keyCode == 32) {
+        // captured a space
+        setTimeout(function() {
+            updateSkinColor();
+            setTimeout(function() {
+                window.location.replace("http://localhost:8000/main.html?r=" +
+                skinColor[0] + "g=" + skinColor[1] + "b=" + skinColor[2]);
+            }, 1000)
+        }, 500);
+    }
+}
+</script>
