@@ -33,7 +33,6 @@ Graphics:
 
     class Engine:
 
-        Engine(GameState, );
-        getRecentlyDead(): number[];
+        Engine(state: GameState);
         render();
         gameOver();

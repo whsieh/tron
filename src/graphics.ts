@@ -1,5 +1,18 @@
 /// <reference path="./references.ts" />
 module Graphics {
-export class Engine {
-}
+    import GameState = Data.GameState;
+
+    export class Engine {
+        constructor(state: GameState) {
+            // fixme
+        }
+
+        render(): void {
+            // fixme
+        }
+
+        gameOver(): void {
+
+        }
+    }
 }
