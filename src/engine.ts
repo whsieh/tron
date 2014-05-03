@@ -231,15 +231,15 @@ module Engine {
             updateDir(player, dt);
             nextPos = move(player.curPos, player.dir, dt);
 
-            line = getLine(scaleToFine(player.curPos), scaleToFine(nextPos));
-            for (var j = 0; j < line.length; j++) {
-                if (collide(line[j])) {
-                    gameState.recentlyDead.push(i);
-                    break;
-                } else {
-                    addObstacle(i, line[j]);
-                }
-            }
+            // line = getLine(scaleToFine(player.curPos), scaleToFine(nextPos));
+            // for (var j = 0; j < line.length; j++) {
+            //     if (collide(line[j])) {
+            //         gameState.recentlyDead.push(i);
+            //         break;
+            //     } else {
+            //         addObstacle(i, line[j]);
+            //     }
+            // }
 
             var len:number = gameState.recentlyDead.length;
             if (len == 0 || gameState.recentlyDead[len-1] != i) {
