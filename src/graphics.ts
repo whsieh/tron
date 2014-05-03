@@ -1,4 +1,6 @@
 /// <reference path="./references.ts" />
+var ghetto = 0;
+
 module Graphics {
     import GameState = Data.GameState;
 
@@ -45,6 +47,7 @@ module Graphics {
 
             this.state = state;
             // Setup Scene and Canvas Element
+            this.scene = new THREE.Scene();
             this.camera = new THREE.PerspectiveCamera(75, $(window).width() / $(window).height(),
                 0.1, 1000);
             this.camera.position.z = 25;
@@ -69,14 +72,18 @@ module Graphics {
 
         render(): void {
             // Restart scene with map
-            this.scene = new THREE.Scene();
             this.scene.add(this.map);
             // Place camera properly
             this.setCamera();
             // Render players and trails
             this.renderPlayers();
-            this.renderTrails();
+            // this.renderTrails();
             // Render the result
+            // console.log("pos: ");
+            // console.log(this.camera.position);
+            // console.log("up : ");
+            // console.log(this.camera.up);
+
             this.renderer.render(this.scene, this.camera);
         }
 
@@ -98,6 +105,7 @@ module Graphics {
             }
 
             this.map = new THREE.Line(geometry, material, THREE.LinePieces);
+            this.scene.add(this.map);
         }
 
         private initializePlayers(): void {
@@ -140,24 +148,24 @@ module Graphics {
                     pos = player.curPos;
                     dir = player.dir;
 
-                    console.log("player at    : " + pos.x + ", " + pos.y);
-                    console.log("player lookat: " + dir.x + ", " + dir.y);
-                    normalizedTheta = player    .normalizedTheta;
+                    normalizedTheta = player.normalizedTheta;
 
                     // Place player in the right position
                     this.players[i].position.x = pos.x;
                     this.players[i].position.y = pos.y;
 
                     // Tilt
-                    up = v3(0, 0, 1);
-                    up.applyAxisAngle(dir, normalizedTheta * Math.PI / 4);
-                    this.players[i].up.set(up);
+                    // up = v3(0, 0, 1);
+                    // up.applyAxisAngle(dir, normalizedTheta * Math.PI / 4);
+                    // this.players[i].up.set(up);
 
                     // Point player in the right direction
                     this.players[i].lookAt(v3(pos.x + dir.x * 50, pos.y + dir.y * 50,
                         PLAYER_HEIGHT + HOVER_HEIGHT - 8));
 
                     this.scene.add(this.players[i]);
+
+                    console.log(normalizedTheta);
                 }
             }
         }

@@ -1,4 +1,8 @@
 /// <reference path="./references.ts" />
+var startSteering;
+var startSteeringLoop;
+var getNormalizedTheta;
+
 module Engine {
     import Point = Data.Point;
     import Player = Data.Player;
@@ -17,9 +21,6 @@ module Engine {
     var obstacles = {};         //The grid for obstacles is on a finer scale than that for player pos
     var gameState: GameState;
     var graphicEngine: Graphics.Engine;
-    var startSteering;
-    var startSteeringLoop;
-    var getNormalizedTheta;
 
     function degreeToRadian(deg: number): number {
         return deg * Math.PI / 180;
