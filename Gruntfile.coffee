@@ -2,29 +2,26 @@ module.exports = (grunt) ->
     grunt.initConfig(
         pkg: grunt.file.readJSON("package.json")
         clean:
-            build: ["build/**/*"]
+            typescript: ["public/js/*"]
         typescript:
             build:
                 src: "**/*.ts"
-                dest: "build/tron.js"
+                dest: "public/js/tron.js"
                 options:
-                    basePath: "src"
-        copy:
+                    basePath: "ts"
+        less:
             build:
-                expand: true
-                cwd: "src"
-                src: ["**/*", "!**/*.ts", "!**/defs/**"]
-                dest: "build"
-            lib:
-                expand: true
-                src: "lib/**/*"
-                dest: "build"
+                src: "less/*.less"
+                dest: "public/css/style.css"
+                options:
+                    sourceMapBasepath: "less"
     )
 
     # Load plugins
     grunt.loadNpmTasks("grunt-contrib-clean")
     grunt.loadNpmTasks("grunt-contrib-copy")
     grunt.loadNpmTasks("grunt-typescript")
+    grunt.loadNpmTasks('grunt-contrib-less');
 
     # Tasks
-    grunt.registerTask("default", ["clean", "typescript:build", "copy:build", "copy:lib"])
+    grunt.registerTask("default", ["clean", "typescript", "less"])
