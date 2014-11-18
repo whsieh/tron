@@ -52,7 +52,7 @@ module Graphics {
                 0.1, 1000);
             this.camera.position.z = 25;
             this.camera.up.set(0, 0, 1);
-            this.renderer = new THREE.WebGLRenderer();
+            this.renderer = new THREE.WebGLRenderer({antialias: true, precision: "highp"});
             this.renderer.setSize($(window).width(), $(window).height());
             $(document.body).prepend($(this.renderer.domElement).attr("id", CANVAS_ID)[0]);
 
@@ -79,10 +79,6 @@ module Graphics {
             this.renderPlayers();
             // this.renderTrails();
             // Render the result
-            // console.log("pos: ");
-            // console.log(this.camera.position);
-            // console.log("up : ");
-            // console.log(this.camera.up);
 
             this.renderer.render(this.scene, this.camera);
         }
@@ -140,7 +136,7 @@ module Graphics {
         }
 
         private renderPlayers() : void {
-            var player, pos, dir, normalizedTheta, up;
+            var player, pos, dir, up, normalizedTheta;
 
             for (var i = 0; i < this.state.players.length; i++) {
                 player = this.state.players[i];
@@ -157,17 +153,13 @@ module Graphics {
                     this.players[i].position.y = pos.y;
 
                     // Tilt
-                    // up = v3(0, 0, 1);
-                    // up.applyAxisAngle(dir, normalizedTheta * Math.PI / 4);
-                    // this.players[i].up.set(up);
+                    up = v3(0, 0, 1).applyAxisAngle(dir, -normalizedTheta * Math.PI / 4)
+                    this.players[i].up.set(up.x, up.y, up.z);
+
 
                     // Point player in the right direction
                     this.players[i].lookAt(v3(pos.x + dir.x * 50, pos.y + dir.y * 50,
                         PLAYER_HEIGHT + HOVER_HEIGHT - 8));
-
-                    // console.log(normalizedTheta);
-                    //console.log("Position: (" + pos.x + ", " + pos.y + "), dir: (" + dir.x + ", " +
-                    //    dir.y + "), turning: " + player.curThetag);
                 }
             }
         }

@@ -16,7 +16,7 @@ module Engine {
                                 //used for graphic
     var SPEED: number = 1.6 / TIMESTEP;   //The speed of all player in coarse grid per millisecond.
     var DELTA_THETA = 0.5 / TIMESTEP;       //Turning speed in degree per millisecond.
-    var MAX_THETA = 15;                     //The maximum degree a player can turn.
+    var MAX_THETA = 4;                     //The maximum degree a player can turn.
 
     var obstacles = {};         //The grid for obstacles is on a finer scale than that for player pos
     var gameState: GameState;
