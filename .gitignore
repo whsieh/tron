@@ -4,3 +4,6 @@
 # Compiled Files
 build/*
 node_modules/*
+
+# Sublime workspace
+*.sublime-workspace
