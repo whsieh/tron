@@ -3,6 +3,7 @@ module.exports = (grunt) ->
         pkg: grunt.file.readJSON("package.json")
         clean:
             typescript: ["public/js/*"]
+            less: ["public/css/*"]
         typescript:
             build:
                 src: "**/*.ts"
@@ -25,3 +26,4 @@ module.exports = (grunt) ->
 
     # Tasks
     grunt.registerTask("default", ["clean", "typescript", "less"])
+    grunt.registerTask("css", ["clean:less", "less"])
