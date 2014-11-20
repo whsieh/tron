@@ -6,7 +6,7 @@ module.exports = (grunt) ->
             less: ["public/css/*"]
         typescript:
             build:
-                src: "**/*.ts"
+                src: "ts/**/*.ts"
                 dest: "public/js/tron.js"
                 options:
                     basePath: "ts"
