@@ -1,4 +1,4 @@
-/// <reference path="./util.ts" />
+/// <reference path="./references.ts" />
 
 module setup {
     // Average a box within the data, does not check for out of bounds error.

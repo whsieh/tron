@@ -1,3 +1,5 @@
+/// <reference path="./references.ts" />
+
 module util {
 
     //============================================================
@@ -163,7 +165,19 @@ module util {
 
         getFrame(): ImageData {
             if (!this.ready() || !this.isCapturing) return;
-            return this.context.getImageData(0, 0, this.video.width, this.video.height);
+            return this.context.getImageData(0, 0, this.destinationWidth, this.destinationHeight);
+        }
+
+        width(): number {
+            if (!this.ready()) return 0;
+
+            return this.destinationWidth;
+        }
+
+        height(): number {
+            if (!this.ready()) return 0;
+
+            return this.destinationHeight;
         }
     }
 }
