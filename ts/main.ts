@@ -11,12 +11,15 @@ $(document).ready(function() {
             camera.cropResize(400, 400);
             camera.start();
 
-            var rgbData = new util.RGBData(400, 400);
-            rgbData.setFrame(camera.getFrame());
-            var color = setup.getAverageColor(rgbData, 0, 0, 400, 400);
+            window.setTimeout(function() {
+                var rgbData = new util.RGBData(400, 400);
+                rgbData.setFrame(camera.getFrame());
+                var color = setup.getAverageColor(rgbData, 150, 150, 100, 100);
 
-            steering.setup(camera, color);
-            steering.start(5000);
+                steering.setup(camera, color);
+                steering.addDisplayCanvas(<any> $("#test")[0]);
+                steering.start(30);
+            }, 3000);
             window.clearInterval(id);
         }
     }, 1000);

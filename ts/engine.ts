@@ -276,11 +276,11 @@ module Engine {
         requestAnimationFrame(step);
    }
 
-    $(document).ready(function() {
-        (<any> startSteering) ();
-        initialize(1);
-        requestAnimationFrame(step);
-    });
+    // $(document).ready(function() {
+    //     (<any> startSteering) ();
+    //     initialize(1);
+    //     requestAnimationFrame(step);
+    // });
 }
 
 

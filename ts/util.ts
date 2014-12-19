@@ -57,10 +57,12 @@ module util {
     }
 
     // Simple helper function to round the color values.
-    export function roundColor(color: Color): void {
-        color.r = Math.round(color.r);
-        color.g = Math.round(color.g);
-        color.b = Math.round(color.b);
+    export function roundColor(color: Color): Color {
+        var c: Color;
+        c.r = Math.round(color.r);
+        c.g = Math.round(color.g);
+        c.b = Math.round(color.b);
+        return c;
     }
 
     //============================================================

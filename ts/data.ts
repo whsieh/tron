@@ -1,5 +1,3 @@
-/// <reference path="./references.ts" />
-
 module Data {
     export var WIDTH: number = 1000;
     export var HEIGHT: number = 1000;

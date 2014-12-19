@@ -17,6 +17,7 @@ module steering {
     var camera: util.Camera = null;
     var skinColor: util.Color = null;
     var rgbData: util.RGBData = null;
+    var canvases: HTMLCanvasElement[] = [];
 
     var id = null;
 
@@ -47,6 +48,10 @@ module steering {
             id = null;
     }
 
+    export function getSkinColor(): util.Color {
+        return skinColor;
+    }
+
     // Handles all 
     function calculateSteeringTheta() {
         rgbData.setFrame(camera.getFrame());
@@ -70,12 +75,6 @@ module steering {
                 }
             }
         }
-
-        // Testing code
-        // $("#test")[0].width = rgbData.width;
-        // $("#test")[0].height = rgbData.height;
-        // var context = (<any> $("#test")[0]).getContext("2d");
-        // draw skin pixels
 
         // Finding average skin pixel positions, assuming screen split in half
         var leftAvgPixel: Pixel = {i: 0, j: 0};
@@ -104,8 +103,22 @@ module steering {
         rightAvgPixel.i /= rightPixelCount;
         rightAvgPixel.j /= rightPixelCount;
 
-        console.log(leftAvgPixel.i + ", " + leftAvgPixel.j);
-        console.log(rightAvgPixel.i + ", " + rightAvgPixel.j);
+        _.each(canvases, function(canvas) {
+            var context = canvas.getContext("2d");
+            context.clearRect(0, 0, rgbData.width, rgbData.height);
+            context.fillStyle = "rgb(0, 0, 0)";
+            for (var i = 0; i < skinPixels.length; i++) {
+                pixel = skinPixels[i];
+                context.fillRect(pixel.i - 1, pixel.j - 1, 3, 3);
+            }
 
+            context.fillStyle = "rgb(255, 0, 0)";
+            context.fillRect(leftAvgPixel.i - 1, leftAvgPixel.j - 1, 3, 3);
+            context.fillRect(rightAvgPixel.i - 1, rightAvgPixel.j - 1, 3, 3);
+        });
+    }
+
+    export function addDisplayCanvas(canvas: HTMLCanvasElement) {
+        canvases.push(canvas);
     }
 }

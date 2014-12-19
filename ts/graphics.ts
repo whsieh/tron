@@ -1,6 +1,4 @@
 /// <reference path="./references.ts" />
-var ghetto = 0;
-
 module Graphics {
     import GameState = Data.GameState;
 
