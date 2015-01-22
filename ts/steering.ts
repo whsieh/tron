@@ -17,7 +17,7 @@ module steering {
     var camera: util.Camera = null;
     var skinColor: util.Color = null;
     var rgbData: util.RGBData = null;
-    var canvases: HTMLCanvasElement[] = [];
+    var canvas: HTMLCanvasElement = null;
 
     var id = null;
 
@@ -52,7 +52,7 @@ module steering {
         return skinColor;
     }
 
-    // Handles all 
+    // Handles all
     function calculateSteeringTheta() {
         rgbData.setFrame(camera.getFrame());
 
@@ -103,22 +103,20 @@ module steering {
         rightAvgPixel.i /= rightPixelCount;
         rightAvgPixel.j /= rightPixelCount;
 
-        _.each(canvases, function(canvas) {
-            var context = canvas.getContext("2d");
-            context.clearRect(0, 0, rgbData.width, rgbData.height);
-            context.fillStyle = "rgb(0, 0, 0)";
-            for (var i = 0; i < skinPixels.length; i++) {
-                pixel = skinPixels[i];
-                context.fillRect(pixel.i - 1, pixel.j - 1, 3, 3);
-            }
+        var context = canvas.getContext("2d");
+        context.clearRect(0, 0, rgbData.width, rgbData.height);
+        context.fillStyle = "rgb(0, 0, 0)";
+        for (var i = 0; i < skinPixels.length; i++) {
+            pixel = skinPixels[i];
+            context.fillRect(pixel.i - 1, pixel.j - 1, 3, 3);
+        }
 
-            context.fillStyle = "rgb(255, 0, 0)";
-            context.fillRect(leftAvgPixel.i - 1, leftAvgPixel.j - 1, 3, 3);
-            context.fillRect(rightAvgPixel.i - 1, rightAvgPixel.j - 1, 3, 3);
-        });
+        context.fillStyle = "rgb(255, 0, 0)";
+        context.fillRect(leftAvgPixel.i - 1, leftAvgPixel.j - 1, 3, 3);
+        context.fillRect(rightAvgPixel.i - 1, rightAvgPixel.j - 1, 3, 3);
     }
 
-    export function addDisplayCanvas(canvas: HTMLCanvasElement) {
-        canvases.push(canvas);
+    export function setDisplayCanvas(_canvas: HTMLCanvasElement) {
+        canvas = _canvas;
     }
 }

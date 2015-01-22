@@ -2,8 +2,7 @@
 
 module setup {
     // Average a box within the data, does not check for out of bounds error.
-    export function getAverageColor(data: util.RGBData, px: number, py: number, dx: number,
-        dy: number)
+    export function getAverageColor(data: util.RGBData, px: number, py: number, dx: number, dy: number)
     {
         var accumulatedColor: util.Color = {r: 0, g: 0, b: 0};
         var color: util.Color = {r: 0, g: 0, b: 0};
