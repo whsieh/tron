@@ -1,13 +1,13 @@
 /// <reference path="./references.ts" />
 
-module steering {
+module Steering {
 
     //============================================================
     // Internal interfaces
     //============================================================
 
     interface Pixel {
-        i: number; j: number;
+        x: number; y: number;
     }
 
     //============================================================
@@ -19,16 +19,24 @@ module steering {
     var rgbData: util.RGBData = null;
     var canvas: HTMLCanvasElement = null;
 
+    var rawThetaWindow: number[] = [];
+    var thetaWindowSize: number;
+    var currentWindowOffset: number = 0;
     var id = null;
 
     //============================================================
     // Functions that control the steering module
     //============================================================
 
-    export function setup(_camera: util.Camera, _skinColor: util.Color) {
+    export function setup(_camera: util.Camera, _skinColor: util.Color, windowSize: number = 5) {
         camera = _camera;
         skinColor = _skinColor;
         rgbData = new util.RGBData(camera.width(), camera.height());
+        thetaWindowSize = windowSize;
+        for (var i = 0; i < windowSize; i++) {
+            console.log(Object.keys(rawThetaWindow));
+            rawThetaWindow.push(0);
+        }
     }
 
     // If camera or skinColor is not set, or camera is not ready, return immediately. Otherwise, start
@@ -71,14 +79,14 @@ module steering {
                     + Math.pow(color.b - skinColor.b, 2);
 
                 if (dist < skinColorThreshold) {
-                    skinPixels.push({i: i, j: j});
+                    skinPixels.push({x: i, y: j});
                 }
             }
         }
 
         // Finding average skin pixel positions, assuming screen split in half
-        var leftAvgPixel: Pixel = {i: 0, j: 0};
-        var rightAvgPixel: Pixel = {i: 0, j: 0};
+        var leftAvgPixel: Pixel = {x: 0, y: 0};
+        var rightAvgPixel: Pixel = {x: 0, y: 0};
         var halfI: number = rgbData.width / 2;
         var pixel: Pixel;
 
@@ -87,36 +95,52 @@ module steering {
         for (var i = 0; i < skinPixels.length; i++) {
             pixel = skinPixels[i];
 
-            if (pixel.i < halfI) {
-                leftAvgPixel.i += pixel.i;
-                leftAvgPixel.j += pixel.j;
+            if (pixel.x < halfI) {
+                leftAvgPixel.x += pixel.x;
+                leftAvgPixel.y += pixel.y;
                 leftPixelCount++;
             } else {
-                rightAvgPixel.i += pixel.i;
-                rightAvgPixel.j += pixel.j;
+                rightAvgPixel.x += pixel.x;
+                rightAvgPixel.y += pixel.y;
                 rightPixelCount++;
             }
         }
 
-        leftAvgPixel.i /= leftPixelCount;
-        leftAvgPixel.j /= leftPixelCount;
-        rightAvgPixel.i /= rightPixelCount;
-        rightAvgPixel.j /= rightPixelCount;
+        leftAvgPixel.x /= leftPixelCount;
+        leftAvgPixel.y /= leftPixelCount;
+        rightAvgPixel.x /= rightPixelCount;
+        rightAvgPixel.y /= rightPixelCount;
+
+        var currentRawTheta = 0;
+        if (rightAvgPixel.x != leftAvgPixel.x) {
+            currentRawTheta = Math.asin((rightAvgPixel.y - leftAvgPixel.y) / (rightAvgPixel.x - leftAvgPixel.x));
+        }
+        rawThetaWindow[currentWindowOffset] = currentRawTheta;
+        currentWindowOffset = (currentWindowOffset + 1) % thetaWindowSize;
+
 
         var context = canvas.getContext("2d");
         context.clearRect(0, 0, rgbData.width, rgbData.height);
         context.fillStyle = "rgb(0, 0, 0)";
         for (var i = 0; i < skinPixels.length; i++) {
             pixel = skinPixels[i];
-            context.fillRect(pixel.i - 1, pixel.j - 1, 3, 3);
+            context.fillRect(pixel.x - 1, pixel.y - 1, 3, 3);
         }
 
         context.fillStyle = "rgb(255, 0, 0)";
-        context.fillRect(leftAvgPixel.i - 1, leftAvgPixel.j - 1, 3, 3);
-        context.fillRect(rightAvgPixel.i - 1, rightAvgPixel.j - 1, 3, 3);
+        context.fillRect(leftAvgPixel.x - 1, leftAvgPixel.y - 1, 3, 3);
+        context.fillRect(rightAvgPixel.x - 1, rightAvgPixel.y - 1, 3, 3);
     }
 
     export function setDisplayCanvas(_canvas: HTMLCanvasElement) {
         canvas = _canvas;
+    }
+
+    export function theta(): number {
+        var rawThetaSum: number = 0;
+        for (var i = 0; i < thetaWindowSize; i++) {
+            rawThetaSum += rawThetaWindow[i];
+        }
+        return rawThetaSum / thetaWindowSize;
     }
 }

@@ -16,9 +16,9 @@ $(document).ready(function() {
                 rgbData.setFrame(camera.getFrame());
                 var color = setup.getAverageColor(rgbData, 150, 150, 100, 100);
 
-                steering.setup(camera, color);
-                steering.setDisplayCanvas(<any> $("#test")[0]);
-                steering.start(30);
+                Steering.setup(camera, color);
+                Steering.setDisplayCanvas(<any> $("#test")[0]);
+                Steering.start(10);
             }, 3000);
             window.clearInterval(id);
         }
