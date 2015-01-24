@@ -1,6 +1,6 @@
 /// <reference path="./references.ts" />
 
-module setup {
+module Setup {
     // Average a box within the data, does not check for out of bounds error.
     export function getAverageColor(data: util.RGBData, px: number, py: number, dx: number, dy: number)
     {

@@ -28,13 +28,12 @@ module Steering {
     // Functions that control the steering module
     //============================================================
 
-    export function setup(_camera: util.Camera, _skinColor: util.Color, windowSize: number = 5) {
+    export function setup(_camera: util.Camera, _skinColor: util.Color, _thetaWindowSize: number = 5) {
         camera = _camera;
         skinColor = _skinColor;
         rgbData = new util.RGBData(camera.width(), camera.height());
-        thetaWindowSize = windowSize;
-        for (var i = 0; i < windowSize; i++) {
-            console.log(Object.keys(rawThetaWindow));
+        thetaWindowSize = _thetaWindowSize;
+        for (var i = 0; i < thetaWindowSize; i++) {
             rawThetaWindow.push(0);
         }
     }
@@ -117,7 +116,6 @@ module Steering {
         }
         rawThetaWindow[currentWindowOffset] = currentRawTheta;
         currentWindowOffset = (currentWindowOffset + 1) % thetaWindowSize;
-
 
         var context = canvas.getContext("2d");
         context.clearRect(0, 0, rgbData.width, rgbData.height);

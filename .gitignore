@@ -9,3 +9,7 @@ public/css/*
 
 # Sublime workspace
 *.sublime-workspace
+
+# Miscellaneous
+runserver
+
