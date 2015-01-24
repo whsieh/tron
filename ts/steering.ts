@@ -14,9 +14,9 @@ module Steering {
     // Global variables
     //============================================================
 
-    var camera: util.Camera = null;
-    var skinColor: util.Color = null;
-    var rgbData: util.RGBData = null;
+    var camera: Util.Camera = null;
+    var skinColor: Util.Color = null;
+    var rgbData: Util.RGBData = null;
     var canvas: HTMLCanvasElement = null;
 
     var rawThetaWindow: number[] = [];
@@ -28,10 +28,10 @@ module Steering {
     // Functions that control the steering module
     //============================================================
 
-    export function setup(_camera: util.Camera, _skinColor: util.Color, _thetaWindowSize: number = 5) {
+    export function setup(_camera: Util.Camera, _skinColor: Util.Color, _thetaWindowSize: number = 5) {
         camera = _camera;
         skinColor = _skinColor;
-        rgbData = new util.RGBData(camera.width(), camera.height());
+        rgbData = new Util.RGBData(camera.width(), camera.height());
         thetaWindowSize = _thetaWindowSize;
         for (var i = 0; i < thetaWindowSize; i++) {
             rawThetaWindow.push(0);
@@ -44,7 +44,7 @@ module Steering {
         if (camera == null || !camera.ready() || skinColor == null)
             return;
 
-        id = window.setInterval(util.bind(this, function() {
+        id = window.setInterval(Util.bind(this, function() {
             calculateSteeringTheta();
         }), pollFrequency);
     }
@@ -55,7 +55,7 @@ module Steering {
             id = null;
     }
 
-    export function getSkinColor(): util.Color {
+    export function getSkinColor(): Util.Color {
         return skinColor;
     }
 
@@ -63,7 +63,7 @@ module Steering {
     function calculateSteeringTheta() {
         rgbData.setFrame(camera.getFrame());
 
-        var color: util.Color = new util.Color();
+        var color: Util.Color = new Util.Color();
         var dist: number;
 
         var skinPixels: Pixel[] = [];

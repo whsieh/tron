@@ -1,13 +1,12 @@
+/// <reference path="./references.ts" />
 /// <reference path="./engine.ts" />
 /// <reference path="./steering.ts" />
 /// <reference path="./util.ts" />
 /// <reference path="./setup.ts" />
-/// <reference path="./references.ts" />
 
 module TronCoordinator {
 
 export function setup(cameraVideoId: String, cameraCanvasId: String, debugCanvasId: String, gameCanvasId: String) {
-
     var cameraVideo = <HTMLVideoElement> findFirstElementFromId(cameraVideoId);
     if (cameraVideo == null)
         return console.log("Setup failed: could not find camera's video element \"" + cameraVideoId + "\"");
@@ -24,14 +23,14 @@ export function setup(cameraVideoId: String, cameraCanvasId: String, debugCanvas
     if (gameCanvas == null)
         return console.log("Setup failed: could not find game canvas \"" + gameCanvasId + "\"");
 
-    var camera = new util.Camera(cameraVideo, cameraCanvas, function(e) {
+    var camera = new Util.Camera(cameraVideo, cameraCanvas, function(e) {
         console.log("Failed to initialize camera with error:" + e.name);
     });
     Steering.setDisplayCanvas(debugCanvas);
     initializeSteeringWithCamera(camera);
 }
 
-function initializeSteeringWithCamera(camera: util.Camera) {
+function initializeSteeringWithCamera(camera: Util.Camera) {
     if (!camera.ready()) {
         setTimeout(function() {
             initializeSteeringWithCamera(camera);
@@ -43,7 +42,7 @@ function initializeSteeringWithCamera(camera: util.Camera) {
 
     console.log("Capturing skin color in 3 seconds...");
     setTimeout(function() {
-        var rgbData = new util.RGBData(200, 150);
+        var rgbData = new Util.RGBData(200, 150);
         rgbData.setFrame(camera.getFrame());
         var skinColor = Setup.getAverageColor(rgbData, 40, 30, 120, 90)
 

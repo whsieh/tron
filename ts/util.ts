@@ -1,6 +1,6 @@
 /// <reference path="./references.ts" />
 
-module util {
+module Util {
 
     //============================================================
     // General helper functions
