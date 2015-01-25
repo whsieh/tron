@@ -117,17 +117,18 @@ module Steering {
         rawThetaWindow[currentWindowOffset] = currentRawTheta;
         currentWindowOffset = (currentWindowOffset + 1) % thetaWindowSize;
 
-        var context = canvas.getContext("2d");
-        context.clearRect(0, 0, rgbData.width, rgbData.height);
-        context.fillStyle = "rgb(0, 0, 0)";
-        for (var i = 0; i < skinPixels.length; i++) {
-            pixel = skinPixels[i];
-            context.fillRect(pixel.x - 1, pixel.y - 1, 3, 3);
+        if (canvas != null) {
+            var context = canvas.getContext("2d");
+            context.clearRect(0, 0, rgbData.width, rgbData.height);
+            context.fillStyle = "rgb(0, 0, 0)";
+            for (var i = 0; i < skinPixels.length; i++) {
+                pixel = skinPixels[i];
+                context.fillRect(pixel.x - 1, pixel.y - 1, 3, 3);
+            }
+            context.fillStyle = "rgb(255, 0, 0)";
+            context.fillRect(leftAvgPixel.x - 1, leftAvgPixel.y - 1, 3, 3);
+            context.fillRect(rightAvgPixel.x - 1, rightAvgPixel.y - 1, 3, 3);
         }
-
-        context.fillStyle = "rgb(255, 0, 0)";
-        context.fillRect(leftAvgPixel.x - 1, leftAvgPixel.y - 1, 3, 3);
-        context.fillRect(rightAvgPixel.x - 1, rightAvgPixel.y - 1, 3, 3);
     }
 
     export function setDisplayCanvas(_canvas: HTMLCanvasElement) {

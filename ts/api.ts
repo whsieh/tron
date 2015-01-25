@@ -70,13 +70,17 @@ function initializeSteering() {
     camera.cropResize(cameraWidth, cameraHeight);
     camera.start();
 
-    var rgbData = new Util.RGBData(cameraWidth, cameraHeight);
-    rgbData.setFrame(camera.getFrame());
-    var skinColor = Setup.getAverageColor(rgbData, cameraWidth / 4, cameraHeight / 4, cameraWidth / 2, cameraHeight / 2);
+    console.log("Preparing to capture skin color...");
+    setTimeout(function() {
+        var rgbData = new Util.RGBData(cameraWidth, cameraHeight);
+        rgbData.setFrame(camera.getFrame());
+        var skinColor = Setup.getAverageColor(rgbData, cameraWidth / 4, cameraHeight / 4, cameraWidth / 2, cameraHeight / 2);
 
-    Steering.setDisplayCanvas(debugCanvas);
-    Steering.setup(camera, skinColor);
-    Steering.start(10);
+        console.log("    Skin color: [r=" + skinColor.r + ", g=" + skinColor.g + ", b=" + skinColor.b + "]");
+        Steering.setDisplayCanvas(debugCanvas);
+        Steering.setup(camera, skinColor);
+        Steering.start(10);
+    }, 1000);
 }
 
 function findFirstElementFromId(id: String) {
