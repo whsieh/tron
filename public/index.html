@@ -15,6 +15,7 @@
     <script>
       $(window).on("load", function() {
         // Constants
+        var $container = $(".container");
         var $svg = $("svg");
         var $mainScreen = $(".main_screen");
         var $rightScreen = $(".right_screen");
@@ -23,9 +24,11 @@
         var smallScreenSize = { width: 250, height: 250 }
         var largeScreenSize = { width: 730, height: 510 }
 
-        // SVG sizing on load
+        // Sizing on load
         var svgHeight = Math.min(window.innerWidth / 2, window.innerHeight)
+        var svgWidth = svgHeight * 2
         $svg.css({ transform: "scale(" + svgHeight / 700 + ")" })
+        $container.width(svgWidth).height(svgHeight)
 
         // Create video element and canvases
         $mainScreen.attr({
