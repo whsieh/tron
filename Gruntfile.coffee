@@ -16,13 +16,20 @@ module.exports = (grunt) ->
                 dest: "public/css/style.css"
                 options:
                     sourceMapBasepath: "less"
+        watch:
+            build: {
+                files: ["ts/**/*.ts", "less/**/*.less"]
+                tasks: "default"
+            }
+
     )
 
     # Load plugins
     grunt.loadNpmTasks("grunt-contrib-clean")
     grunt.loadNpmTasks("grunt-contrib-copy")
     grunt.loadNpmTasks("grunt-typescript")
-    grunt.loadNpmTasks('grunt-contrib-less');
+    grunt.loadNpmTasks('grunt-contrib-less')
+    grunt.loadNpmTasks('grunt-contrib-watch')
 
     # Tasks
     grunt.registerTask("default", ["clean", "typescript", "less"])
