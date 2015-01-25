@@ -80,6 +80,7 @@ function initializeSteering() {
         Steering.setDisplayCanvas(debugCanvas);
         Steering.setup(camera, skinColor);
         Steering.start(10);
+        Engine.initialize(1, gameCanvas);
     }, 1000);
 }
 

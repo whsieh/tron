@@ -123,7 +123,7 @@ module Steering {
             context.fillStyle = "rgb(0, 0, 0)";
             for (var i = 0; i < skinPixels.length; i++) {
                 pixel = skinPixels[i];
-                context.fillRect(pixel.x, pixel.y, 1, 1);
+                context.fillRect(pixel.x - 1, pixel.y- 1, 3, 3);
             }
             context.fillStyle = "rgb(255, 0, 0)";
             context.fillRect(leftAvgPixel.x - 2, leftAvgPixel.y - 2, 5, 5);

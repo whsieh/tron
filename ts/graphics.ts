@@ -10,7 +10,6 @@ module Graphics {
 
     // Constants
 
-    var CANVAS_ID: string = "app";
     var COLORS: number[] = [
         0xFF00FF,
         0x800000,
@@ -38,27 +37,26 @@ module Graphics {
         private players: Array<any> = [];
         private trails: Array<any> = [];
 
-        constructor(state: GameState) {
+        constructor(state: GameState, gameCanvas: HTMLCanvasElement) {
             if (state.numPlayers > 8) {
                 throw new Error("Cannot support more than 8 players");
             }
 
+            var screenWidth = gameCanvas.width;
+            var screenHeight = gameCanvas.height;
             this.state = state;
             // Setup Scene and Canvas Element
             this.scene = new THREE.Scene();
-            this.camera = new THREE.PerspectiveCamera(75, $(window).width() / $(window).height(),
-                0.1, 1000);
+            this.camera = new THREE.PerspectiveCamera(75, screenWidth / screenHeight, 0.1, 1000);
             this.camera.position.z = 25;
             this.camera.up.set(0, 0, 1);
-            this.renderer = new THREE.WebGLRenderer({antialias: true, precision: "highp"});
-            this.renderer.setSize($(window).width(), $(window).height());
-            $(document.body).prepend($(this.renderer.domElement).attr("id", CANVAS_ID)[0]);
-
+            this.renderer = new THREE.CanvasRenderer({canvas: gameCanvas});
+            this.renderer.setSize(screenWidth, screenHeight);
             // Callbacks
             $(window).resize(function() {
                 if (this.renderer != null && this.camera != null) {
-                    this.renderer.setSize($(window).width(), $(window).height());
-                    this.camera.aspect = $(window).width() / $(window).height();
+                    this.renderer.setSize(screenWidth, screenHeight);
+                    this.camera.aspect = screenWidth / screenHeight;
                     this.camera.updateProjectionMatrix();
                 }
             });
@@ -192,154 +190,4 @@ module Graphics {
             this.camera.updateProjectionMatrix();
         }
     }
-
-    // function test() {
-    //     $("document").ready(function() {
-    //         // Setup scene
-    //         var scene = new THREE.Scene();
-    //         var camera = new THREE.PerspectiveCamera( 75, $(window).width() / $(window).height(),
-    //         0.1, 1000 );
-
-    //         var renderer = new THREE.WebGLRenderer();
-    //         renderer.setSize( $(window).width(), $(window).height() );
-    //         document.body.appendChild( $(renderer.domElement).attr("id", CANVAS_ID)[0] );
-
-    //         $(window).resize(function() {
-    //             renderer.setSize( $(window).width(), $(window).height() );
-    //             camera.aspect = $(window).width() / $(window).height();
-    //             camera.updateProjectionMatrix();
-    //             renderer.render(scene, camera);
-    //         });
-
-    //         // Create
-    //         (function() {
-    //             var material = new THREE.LineBasicMaterial({color: 0x00ff00});
-    //             var geometry = new THREE.Geometry();
-    //             for (var i = 0; i <= Data.WIDTH; i += 50) {
-    //                 geometry.vertices.push(v3(i, 0, 0));
-    //                 geometry.vertices.push(v3(i, Data.HEIGHT, 0));
-    //             }
-
-    //             for (var j = 0; j <= Data.HEIGHT; j+= 50) {
-    //                 geometry.vertices.push(v3(0, j, 0));
-    //                 geometry.vertices.push(v3(Data.WIDTH, j, 0));
-    //             }
-
-    //             var line = new THREE.Line(geometry, material, THREE.LinePieces);
-    //             scene.add( line );
-    //         })();
-
-    //         // Player position
-    //         var player;
-    //         var x = Data.WIDTH / 2;
-    //         var y = Data.HEIGHT / 2;
-    //         var prevx = x;
-    //         var prevy = y;
-    //         var dir = v3(0, 1, 0);
-
-    //         // Camera
-    //         camera.position.z = 25;
-    //         camera.up = v3(0, 0, 1);
-
-    //         // One player
-    //         var geometry = new THREE.Geometry();
-    //         geometry = new THREE.Geometry();
-    //         geometry.vertices.push(v3(0, 0, 0));
-    //         geometry.vertices.push(v3(6, 0, -20.9));
-    //         geometry.vertices.push(v3(-6, 0, -20.9));
-    //         geometry.vertices.push(v3(-6, -PLAYER_HEIGHT, -20));
-    //         geometry.vertices.push(v3(6, -PLAYER_HEIGHT, -20));
-
-    //         geometry.faces.push(new THREE.Face3(0, 1, 2));
-    //         geometry.faces.push(new THREE.Face3(0, 4, 1));
-    //         geometry.faces.push(new THREE.Face3(0, 2, 3));
-    //         geometry.faces.push(new THREE.Face3(4, 3, 2));
-    //         geometry.faces.push(new THREE.Face3(4, 2, 1));
-
-    //         var material = new THREE.MeshBasicMaterial({
-    //             color: COLORS[0],
-    //             wireframe: true,
-    //             wireframeLinewidth: 3
-    //         });
-
-    //         player = new THREE.Mesh(geometry, material);
-    //         player.position.z = 10;
-    //         player.up.set(0, 0, 1);
-
-    //         scene.add(player);
-
-    //         // Update
-
-    //         // player.position.x = x;
-    //         // player.position.y = y;
-    //         // player.lookAt(v3(x + dir.x * 50, y + dir.y * 50, player.position.z - 8));
-
-    //         function update() {
-    //             dir.normalize();
-    //             player.position.x = x;
-    //             player.position.y = y;
-    //             player.lookAt(v3(x + dir.x * 50, y + dir.y * 50, player.position.z - 8));
-
-    //             camera.position.x = x - dir.x * 50;
-    //             camera.position.y = y - dir.y * 50;
-    //             camera.lookAt(v3(x + dir.x * 50, y + dir.y * 50, 0));
-    //             camera.updateProjectionMatrix();
-
-    //             // Add trail
-    //             if (prevx != x || prevy != y) {
-    //                 var geometry = new THREE.Geometry();
-    //                 var material = new THREE.MeshBasicMaterial({color: COLORS[0] + 0x01010});
-    //                 material.side = THREE.DoubleSide;
-    //                 geometry.vertices.push(v3(prevx, prevy, HOVER_HEIGHT));
-    //                 geometry.vertices.push(v3(prevx, prevy, PLAYER_HEIGHT + HOVER_HEIGHT));
-    //                 geometry.vertices.push(v3(x, y, HOVER_HEIGHT));
-    //                 geometry.vertices.push(v3(x, y, PLAYER_HEIGHT + HOVER_HEIGHT));
-
-    //                 geometry.faces.push(new THREE.Face3(0, 1, 2));
-    //                 geometry.faces.push(new THREE.Face3(1, 2, 3));
-    //             }
-
-    //             scene.add(new THREE.Mesh(geometry, material));
-    //         }
-
-    //         update();
-
-    //         // Render
-    //         var render = function () {
-    //             requestAnimationFrame(render);
-    //             renderer.render(scene, camera);
-    //         };
-
-    //         // Arrow keys
-    //         $(document).keydown(function(e){
-    //             dir.setLength(10);
-    //             if (e.keyCode == 37) {
-    //                 // left
-    //                 dir.applyAxisAngle(v3(0, 0, 1), 0.104719755);
-    //             } else if (e.keyCode == 38) {
-    //                 // up
-    //                 prevx = x;
-    //                 prevy = y;
-    //                 x += dir.x;
-    //                 y += dir.y;
-    //             } else if (e.keyCode == 39) {
-    //                 // right
-    //                 dir.applyAxisAngle(v3(0, 0, 1), -0.104719755);
-    //             } else if (e.keyCode == 40) {
-    //                 // down
-    //                 prevx = x;
-    //                 prevy = y;
-    //                 x -= dir.x;
-    //                 y -= dir.y;
-    //             }
-    //             update();
-
-    //             return false;
-    //         });
-
-    //         render();
-    //     });
-    // }
-
-    // test();
 }

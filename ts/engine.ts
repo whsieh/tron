@@ -1,8 +1,4 @@
 /// <reference path="./references.ts" />
-var startSteering;
-var startSteeringLoop;
-var getNormalizedTheta;
-
 module Engine {
     import Point = Data.Point;
     import Player = Data.Player;
@@ -21,6 +17,18 @@ module Engine {
     var obstacles = {};         //The grid for obstacles is on a finer scale than that for player pos
     var gameState: GameState;
     var graphicEngine: Graphics.Engine;
+
+    export function initialize(numPlayers: number, gameCanvas: HTMLCanvasElement) {
+        gameState = newGameState(numPlayers);
+        graphicEngine = new Graphics.Engine(gameState, gameCanvas);
+        //Add the starting position of each player to obstacles
+        var player: Player;
+        for (var i = 0; i < gameState.numPlayers; i++) {
+            player = gameState.players[i];
+            obstacles[i] = {};
+            addObstacle(i, scaleToFine(player.curPos));
+        }
+    }
 
     function degreeToRadian(deg: number): number {
         return deg * Math.PI / 180;
@@ -81,24 +89,6 @@ module Engine {
     function addObstacle(playerID: number, p: Point): void {
         obstacles[playerID][pointToString(p)] = true;
     }
-
-
-
-    function initialize(numPlayers: number) {
-        gameState = newGameState(numPlayers);
-        graphicEngine = new Graphics.Engine(gameState);
-        (<any> startSteeringLoop) ();
-
-        //Add the starting position of each player to obstacles
-        var player: Player;
-        for (var i = 0; i < gameState.numPlayers; i++) {
-            player = gameState.players[i];
-            obstacles[i] = {};
-            addObstacle(i, scaleToFine(player.curPos));
-        }
-
-    }
-
 
     var zaxis: Vector3 = new Vector3(0, 0, 1);
     //Calculate the new position in coarse grid given current position (in coarse grid), orientation
@@ -218,7 +208,7 @@ module Engine {
 
         //Get player input for player 0 and update its normalized theta
         if (!gameState.players[0].isDead) {
-            gameState.players[0].normalizedTheta = (<any> getNormalizedTheta) ();
+            gameState.players[0].normalizedTheta = Steering.theta();
         }
 
         //Update the normalized theta for all other players
@@ -275,12 +265,6 @@ module Engine {
             graphicEngine.gameOver();
         requestAnimationFrame(step);
    }
-
-    // $(document).ready(function() {
-    //     (<any> startSteering) ();
-    //     initialize(1);
-    //     requestAnimationFrame(step);
-    // });
 }
 
 
