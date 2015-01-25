@@ -19,7 +19,9 @@
     </style>
     <script>
       $(function() {
-        TronCoordinator.setup("webcam-video", "webcam-canvas", "debug-canvas", "game-canvas");
+        var options = new Coordinator.SetupOptions("webcam-video", "webcam-canvas", "debug-canvas", "game-canvas");
+        options.setCameraDimensions(200, 150);
+        Coordinator.setup(options).initialize();
       });
     </script>
 </head>

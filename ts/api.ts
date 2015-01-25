@@ -4,51 +4,79 @@
 /// <reference path="./util.ts" />
 /// <reference path="./setup.ts" />
 
-module TronCoordinator {
+module Coordinator {
 
-export function setup(cameraVideoId: String, cameraCanvasId: String, debugCanvasId: String, gameCanvasId: String) {
-    var cameraVideo = <HTMLVideoElement> findFirstElementFromId(cameraVideoId);
-    if (cameraVideo == null)
-        return console.log("Setup failed: could not find camera's video element \"" + cameraVideoId + "\"");
+var cameraVideo: HTMLVideoElement = null;
+var cameraCanvas: HTMLCanvasElement = null;
+var debugCanvas: HTMLCanvasElement = null;
+var gameCanvas: HTMLCanvasElement = null;
+var camera: Util.Camera = null;
+var cameraWidth: number;
+var cameraHeight: number;
 
-    var cameraCanvas = <HTMLCanvasElement> findFirstElementFromId(cameraCanvasId);
-    if (cameraCanvas == null)
-        return console.log("Setup failed: could not find camera's canvas element \"" + cameraCanvasId + "\"");
+export class SetupOptions {
+    constructor(cameraVideoId: String, cameraCanvasId: String, debugCanvasId: String, gameCanvasId: String) {
+        this.cameraVideoId = cameraVideoId;
+        this.cameraCanvasId = cameraCanvasId;
+        this.debugCanvasId = debugCanvasId;
+        this.gameCanvasId = gameCanvasId;
+    }
 
-    var debugCanvas = <HTMLCanvasElement> findFirstElementFromId(debugCanvasId);
-    if (debugCanvas == null)
-        return console.log("Setup failed: could not find debug canvas \"" + debugCanvasId + "\"");
+    public setCameraDimensions(width: number, height: number) {
+        this.cameraWidth = width;
+        this.cameraHeight = height;
+    }
 
-    var gameCanvas = <HTMLCanvasElement> findFirstElementFromId(gameCanvasId);
-    if (gameCanvas == null)
-        return console.log("Setup failed: could not find game canvas \"" + gameCanvasId + "\"");
-
-    var camera = new Util.Camera(cameraVideo, cameraCanvas, function(e) {
-        console.log("Failed to initialize camera with error:" + e.name);
-    });
-    Steering.setDisplayCanvas(debugCanvas);
-    initializeSteeringWithCamera(camera);
+    cameraVideoId: String;
+    cameraCanvasId: String;
+    debugCanvasId: String;
+    gameCanvasId: String;
+    cameraWidth: number = 200;
+    cameraHeight: number = 150;
 }
 
-function initializeSteeringWithCamera(camera: Util.Camera) {
+export function setup(options: SetupOptions): any {
+    cameraVideo = <HTMLVideoElement> findFirstElementFromId(options.cameraVideoId);
+    if (cameraVideo == null)
+        return console.log("Setup failed: could not find camera's video element \"" + options.cameraVideoId + "\"");
+
+    cameraCanvas = <HTMLCanvasElement> findFirstElementFromId(options.cameraCanvasId);
+    if (cameraCanvas == null)
+        return console.log("Setup failed: could not find camera's canvas element \"" + options.cameraCanvasId + "\"");
+
+    debugCanvas = <HTMLCanvasElement> findFirstElementFromId(options.debugCanvasId);
+    if (debugCanvas == null)
+        return console.log("Setup failed: could not find debug canvas \"" + options.debugCanvasId + "\"");
+
+    gameCanvas = <HTMLCanvasElement> findFirstElementFromId(options.gameCanvasId);
+    if (gameCanvas == null)
+        return console.log("Setup failed: could not find game canvas \"" + options.gameCanvasId + "\"");
+
+    camera = new Util.Camera(cameraVideo, cameraCanvas, function(e) {
+        console.log("Failed to initialize camera with error:" + e.name);
+    });
+    cameraWidth = options.cameraWidth
+    cameraHeight = options.cameraHeight
+    return {
+        initialize: initializeSteering
+    }
+}
+
+function initializeSteering() {
     if (!camera.ready()) {
-        setTimeout(function() {
-            initializeSteeringWithCamera(camera);
-        }, 1000);
+        setTimeout(initializeSteering, 1000);
         return;
     }
-    camera.cropResize(200, 150);
+    camera.cropResize(cameraWidth, cameraHeight);
     camera.start();
 
-    console.log("Capturing skin color in 3 seconds...");
-    setTimeout(function() {
-        var rgbData = new Util.RGBData(200, 150);
-        rgbData.setFrame(camera.getFrame());
-        var skinColor = Setup.getAverageColor(rgbData, 40, 30, 120, 90)
+    var rgbData = new Util.RGBData(cameraWidth, cameraHeight);
+    rgbData.setFrame(camera.getFrame());
+    var skinColor = Setup.getAverageColor(rgbData, cameraWidth / 4, cameraHeight / 4, cameraWidth / 2, cameraHeight / 2);
 
-        Steering.setup(camera, skinColor);
-        Steering.start(10);
-    }, 3000);
+    Steering.setDisplayCanvas(debugCanvas);
+    Steering.setup(camera, skinColor);
+    Steering.start(10);
 }
 
 function findFirstElementFromId(id: String) {
