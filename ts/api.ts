@@ -38,33 +38,31 @@ export class SetupOptions {
 export function setup(options: SetupOptions): any {
     cameraVideo = <HTMLVideoElement> findFirstElementFromId(options.cameraVideoId);
     if (cameraVideo == null)
-        return console.log("Setup failed: could not find camera's video element \"" + options.cameraVideoId + "\"");
+        return { error: "Setup failed: could not find camera's video element \"" + options.cameraVideoId + "\"" }
 
     cameraCanvas = <HTMLCanvasElement> findFirstElementFromId(options.cameraCanvasId);
     if (cameraCanvas == null)
-        return console.log("Setup failed: could not find camera's canvas element \"" + options.cameraCanvasId + "\"");
+        return { error: "Setup failed: could not find camera's canvas element \"" + options.cameraCanvasId + "\"" }
 
     debugCanvas = <HTMLCanvasElement> findFirstElementFromId(options.debugCanvasId);
     if (debugCanvas == null)
-        return console.log("Setup failed: could not find debug canvas \"" + options.debugCanvasId + "\"");
+        return { error: "Setup failed: could not find debug canvas \"" + options.debugCanvasId + "\"" }
 
     gameCanvas = <HTMLCanvasElement> findFirstElementFromId(options.gameCanvasId);
     if (gameCanvas == null)
-        return console.log("Setup failed: could not find game canvas \"" + options.gameCanvasId + "\"");
+        return { error: "Setup failed: could not find game canvas \"" + options.gameCanvasId + "\"" }
 
     camera = new Util.Camera(cameraVideo, cameraCanvas, function(e) {
-        console.log("Failed to initialize camera with error:" + e.name);
+        return { error: "Failed to initialize camera with error:" + e.name }
     });
     cameraWidth = options.cameraWidth
     cameraHeight = options.cameraHeight
-    return {
-        initialize: initializeSteering
-    }
+    return { init: initializeSteeringAndGame };
 }
 
-function initializeSteering() {
+function initializeSteeringAndGame() {
     if (!camera.ready()) {
-        setTimeout(initializeSteering, 1000);
+        setTimeout(initializeSteeringAndGame, 1000);
         return;
     }
     camera.cropResize(cameraWidth, cameraHeight);
@@ -81,6 +79,7 @@ function initializeSteering() {
         Steering.setup(camera, skinColor);
         Steering.start(10);
         Engine.initialize(1, gameCanvas);
+        Engine.step(0);
     }, 1000);
 }
 

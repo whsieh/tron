@@ -52,6 +52,7 @@ module Graphics {
             this.camera.up.set(0, 0, 1);
             this.renderer = new THREE.CanvasRenderer({canvas: gameCanvas});
             this.renderer.setSize(screenWidth, screenHeight);
+            this.renderer.setClearColor(0x000000, 1);
             // Callbacks
             $(window).resize(function() {
                 if (this.renderer != null && this.camera != null) {

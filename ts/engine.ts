@@ -30,6 +30,77 @@ module Engine {
         }
     }
 
+   var start: number = null;
+   export function step(timestamp: number) {
+        console.log("Updating timestep: " + timestamp);
+        var dt: number;
+        if (start == null) start = timestamp;
+        dt = timestamp - start;
+        start = timestamp;
+
+        //Clear recently dead
+        gameState.recentlyDead.length = 0;
+
+        //Get player input for player 0 and update its normalized theta
+        if (!gameState.players[0].isDead) {
+            gameState.players[0].normalizedTheta = Steering.theta();
+        }
+
+        //Update the normalized theta for all other players
+        for (var i = 1; i < gameState.numPlayers; i++) {
+            if (!gameState.players[i].isDead)
+                gameState.players[i].normalizedTheta = AINormalizedTheta(i, gameState.players[i]);
+        }
+
+        var line: Point[];
+        var player: Player;
+        var nextPos: Point;
+
+        for (var i = 0; i < gameState.numPlayers; i++) {
+            player = gameState.players[i];
+            if (player.isDead)
+                continue;
+            updateDir(player, dt);
+            nextPos = move(player, dt);
+
+            line = getLine(scaleToFine(player.curPos), scaleToFine(nextPos));
+            for (var j = 0; j < line.length; j++) {
+                if (collide(line[j])) {
+                    gameState.recentlyDead.push(i);
+                    break;
+                } else {
+                    addObstacle(i, line[j]);
+                }
+            }
+
+            var len:number = gameState.recentlyDead.length;
+            if (len == 0 || gameState.recentlyDead[len-1] != i) {
+                line = getLine(player.curPos, nextPos);
+                for (var j = 0; j < line.length; j++) {
+                    player.trail.push(line[j]);
+                }
+                player.curPos = nextPos;
+            }
+        }
+
+        //Update the status of players who died this step
+        for (var i = 0; i < gameState.recentlyDead.length; i++) {
+            gameState.players[gameState.recentlyDead[i]].isDead = true;
+        }
+
+        var numPlayerAlive: number = 0;
+        for (var i = 0; i < gameState.numPlayers; i++) {
+            if (!gameState.players[i].isDead)
+                numPlayerAlive++;
+        }
+
+        if (numPlayerAlive >= 1)
+            graphicEngine.render();
+        else
+            graphicEngine.gameOver();
+        requestAnimationFrame(step);
+   }
+
     function degreeToRadian(deg: number): number {
         return deg * Math.PI / 180;
     }
@@ -115,16 +186,16 @@ module Engine {
 
     //Check if the given position (in fine grid) has collided with any obstacles.
     function collide(pos: Point): boolean {
-        var maxBound: number = WIDTH * FINE_SCALE;
-        if (pos.x < 0 || pos.y < 0 || pos.x >= maxBound || pos.y >= maxBound) {
-            return true;
-        }
+        // var maxBound: number = WIDTH * FINE_SCALE;
+        // if (pos.x < 0 || pos.y < 0 || pos.x >= maxBound || pos.y >= maxBound) {
+        //     return true;
+        // }
 
-        for (var i = 0; i < gameState.numPlayers; i++) {
-            if (gameState.players[i].isDead == false && obstacles[i][pointToString(pos)]) {
-                return true;
-            }
-        }
+        // for (var i = 0; i < gameState.numPlayers; i++) {
+        //     if (gameState.players[i].isDead == false && obstacles[i][pointToString(pos)]) {
+        //         return true;
+        //     }
+        // }
 
         return false;
     }
@@ -194,76 +265,6 @@ module Engine {
    function AINormalizedTheta(playerID: number, player: Player): number {
         //a stub that do nothing for now
         return 0;
-   }
-
-   var start: number = null;
-   function step(timestamp: number) {
-        var dt: number;
-        if (start == null) start = timestamp;
-        dt = timestamp - start;
-        start = timestamp;
-
-        //Clear recently dead
-        gameState.recentlyDead.length = 0;
-
-        //Get player input for player 0 and update its normalized theta
-        if (!gameState.players[0].isDead) {
-            gameState.players[0].normalizedTheta = Steering.theta();
-        }
-
-        //Update the normalized theta for all other players
-        for (var i = 1; i < gameState.numPlayers; i++) {
-            if (!gameState.players[i].isDead)
-                gameState.players[i].normalizedTheta = AINormalizedTheta(i, gameState.players[i]);
-        }
-
-        var line: Point[];
-        var player: Player;
-        var nextPos: Point;
-
-        for (var i = 0; i < gameState.numPlayers; i++) {
-            player = gameState.players[i];
-            if (player.isDead)
-                continue;
-            updateDir(player, dt);
-            nextPos = move(player, dt);
-
-            line = getLine(scaleToFine(player.curPos), scaleToFine(nextPos));
-            for (var j = 0; j < line.length; j++) {
-                if (collide(line[j])) {
-                    gameState.recentlyDead.push(i);
-                    break;
-                } else {
-                    addObstacle(i, line[j]);
-                }
-            }
-
-            var len:number = gameState.recentlyDead.length;
-            if (len == 0 || gameState.recentlyDead[len-1] != i) {
-                line = getLine(player.curPos, nextPos);
-                for (var j = 0; j < line.length; j++) {
-                    player.trail.push(line[j]);
-                }
-                player.curPos = nextPos;
-            }
-        }
-
-        //Update the status of players who died this step
-        for (var i = 0; i < gameState.recentlyDead.length; i++) {
-            gameState.players[gameState.recentlyDead[i]].isDead = true;
-        }
-
-        var numPlayerAlive: number = 0;
-        for (var i = 0; i < gameState.numPlayers; i++) {
-            if (!gameState.players[i].isDead)
-                numPlayerAlive++;
-        }
-
-        if (numPlayerAlive >= 1)
-            graphicEngine.render();
-        else
-            graphicEngine.gameOver();
-        requestAnimationFrame(step);
    }
 }
 
