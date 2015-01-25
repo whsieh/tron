@@ -2,23 +2,24 @@
 
 module Setup {
     // Average a box within the data, does not check for out of bounds error.
-    export function getAverageColor(data: Util.RGBData, px: number, py: number, dx: number, dy: number)
+    export function getAverageColor(data: Util.RGBData, left: number, top: number, width: number, height: number)
     {
         var accumulatedColor: Util.Color = {r: 0, g: 0, b: 0};
         var color: Util.Color = {r: 0, g: 0, b: 0};
-        var t = 1;
-        for (var i = px; i < px + dx; i++) {
-            for (var j = py; j < py + dy; j++, t++) {
-                data.getPixelColor(i, j, color)
+        var numPixelsSampled = 0;
+        for (var i = left; i < left + width; i++) {
+            for (var j = top; j < top + height; j++) {
+                data.getPixelColor(i, j, color);
                 accumulatedColor.r += color.r;
                 accumulatedColor.g += color.g;
                 accumulatedColor.b += color.b;
+                numPixelsSampled++;
             }
         }
 
-        accumulatedColor.r = accumulatedColor.r / t;
-        accumulatedColor.g = accumulatedColor.g / t;
-        accumulatedColor.b = accumulatedColor.b / t;
+        accumulatedColor.r = accumulatedColor.r / numPixelsSampled;
+        accumulatedColor.g = accumulatedColor.g / numPixelsSampled;
+        accumulatedColor.b = accumulatedColor.b / numPixelsSampled;
 
         return accumulatedColor;
     }

@@ -31,8 +31,8 @@ export class SetupOptions {
     cameraCanvasId: String;
     debugCanvasId: String;
     gameCanvasId: String;
-    cameraWidth: number = 200;
-    cameraHeight: number = 150;
+    cameraWidth: number = 250;
+    cameraHeight: number = 250;
 }
 
 export function setup(options: SetupOptions): any {
@@ -74,7 +74,7 @@ function initializeSteering() {
     setTimeout(function() {
         var rgbData = new Util.RGBData(cameraWidth, cameraHeight);
         rgbData.setFrame(camera.getFrame());
-        var skinColor = Setup.getAverageColor(rgbData, cameraWidth / 4, cameraHeight / 4, cameraWidth / 2, cameraHeight / 2);
+        var skinColor = Setup.getAverageColor(rgbData, Math.round(cameraWidth / 3), Math.round(cameraHeight / 3), Math.round(cameraWidth / 3), Math.round(cameraHeight / 3));
 
         console.log("    Skin color: [r=" + skinColor.r + ", g=" + skinColor.g + ", b=" + skinColor.b + "]");
         Steering.setDisplayCanvas(debugCanvas);

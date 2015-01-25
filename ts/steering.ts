@@ -22,13 +22,14 @@ module Steering {
     var rawThetaWindow: number[] = [];
     var thetaWindowSize: number;
     var currentWindowOffset: number = 0;
+    var samplingStride: number;
     var id = null;
 
     //============================================================
     // Functions that control the steering module
     //============================================================
 
-    export function setup(_camera: Util.Camera, _skinColor: Util.Color, _thetaWindowSize: number = 5) {
+    export function setup(_camera: Util.Camera, _skinColor: Util.Color, _thetaWindowSize: number = 5, _samplingStride: number = 2) {
         camera = _camera;
         skinColor = _skinColor;
         rgbData = new Util.RGBData(camera.width(), camera.height());
@@ -36,6 +37,7 @@ module Steering {
         for (var i = 0; i < thetaWindowSize; i++) {
             rawThetaWindow.push(0);
         }
+        samplingStride = _samplingStride;
     }
 
     // If camera or skinColor is not set, or camera is not ready, return immediately. Otherwise, start
@@ -46,7 +48,7 @@ module Steering {
 
         id = window.setInterval(Util.bind(this, function() {
             calculateSteeringTheta();
-        }), pollFrequency);
+        }), 1000 / pollFrequency);
     }
 
     export function stop() {
@@ -59,7 +61,6 @@ module Steering {
         return skinColor;
     }
 
-    // Handles all
     function calculateSteeringTheta() {
         rgbData.setFrame(camera.getFrame());
 
@@ -70,13 +71,12 @@ module Steering {
         var skinColorThreshold: number = 1000;
 
         // Gathering skin pixels
-        for (var i = 0; i < rgbData.width; i++) {
-            for (var j = 0; j < rgbData.height; j++) {
+        for (var i = 0; i < rgbData.width; i += samplingStride) {
+            for (var j = 0; j < rgbData.height; j += samplingStride) {
                 rgbData.getPixelColor(i, j, color);
                 dist = Math.pow(color.r - skinColor.r, 2)
                     + Math.pow(color.g - skinColor.g, 2)
                     + Math.pow(color.b - skinColor.b, 2);
-
                 if (dist < skinColorThreshold) {
                     skinPixels.push({x: i, y: j});
                 }
@@ -123,11 +123,11 @@ module Steering {
             context.fillStyle = "rgb(0, 0, 0)";
             for (var i = 0; i < skinPixels.length; i++) {
                 pixel = skinPixels[i];
-                context.fillRect(pixel.x - 1, pixel.y - 1, 3, 3);
+                context.fillRect(pixel.x, pixel.y, 1, 1);
             }
             context.fillStyle = "rgb(255, 0, 0)";
-            context.fillRect(leftAvgPixel.x - 1, leftAvgPixel.y - 1, 3, 3);
-            context.fillRect(rightAvgPixel.x - 1, rightAvgPixel.y - 1, 3, 3);
+            context.fillRect(leftAvgPixel.x - 2, leftAvgPixel.y - 2, 5, 5);
+            context.fillRect(rightAvgPixel.x - 2, rightAvgPixel.y - 2, 5, 5);
         }
     }
 
