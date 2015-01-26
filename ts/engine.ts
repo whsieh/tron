@@ -65,7 +65,7 @@ module Engine {
 
             line = getLine(scaleToFine(player.curPos), scaleToFine(nextPos));
             for (var j = 0; j < line.length; j++) {
-                if (collide(line[j])) {
+                if (isCollided(line[j])) {
                     gameState.recentlyDead.push(i);
                     break;
                 } else {
@@ -185,7 +185,7 @@ module Engine {
     }
 
     //Check if the given position (in fine grid) has collided with any obstacles.
-    function collide(pos: Point): boolean {
+    function isCollided(pos: Point): boolean {
         // var maxBound: number = WIDTH * FINE_SCALE;
         // if (pos.x < 0 || pos.y < 0 || pos.x >= maxBound || pos.y >= maxBound) {
         //     return true;
