@@ -13,6 +13,13 @@ module Util {
         }
     }
 
+    // Helper function to find an element from an ID, adding the # if necessary
+    export function findFirstElementFromId(id: String) {
+        var elementId = id.charAt(0) == "#" ? id : ("#" + id);
+        var matchingElements = <any> $(elementId);
+        return matchingElements.size() == 0 ? null : matchingElements[0];
+    }
+
     //============================================================
     // Wrapper classes
     //============================================================

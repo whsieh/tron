@@ -1,92 +1,67 @@
 /// <reference path="./references.ts" />
-/// <reference path="./engine.ts" />
-/// <reference path="./steering.ts" />
-/// <reference path="./util.ts" />
-/// <reference path="./setup.ts" />
 
 module Coordinator {
 
-var cameraVideo: HTMLVideoElement = null;
-var cameraCanvas: HTMLCanvasElement = null;
-var debugCanvas: HTMLCanvasElement = null;
-var gameCanvas: HTMLCanvasElement = null;
-var camera: Util.Camera = null;
-var cameraWidth: number;
-var cameraHeight: number;
+    export function create(cameraVideoId: String, cameraCanvasId: String, debugCanvasId: String, gameCanvasId: String): any {
+        var cameraVideo: HTMLVideoElement = null;
+        var cameraCanvas: HTMLCanvasElement = null;
+        var debugCanvas: HTMLCanvasElement = null;
+        var gameCanvas: HTMLCanvasElement = null;
+        var camera: Util.Camera = null;
+        var cameraWidth: number = 250;
+        var cameraHeight: number = 190;
 
-export class SetupOptions {
-    constructor(cameraVideoId: String, cameraCanvasId: String, debugCanvasId: String, gameCanvasId: String) {
-        this.cameraVideoId = cameraVideoId;
-        this.cameraCanvasId = cameraCanvasId;
-        this.debugCanvasId = debugCanvasId;
-        this.gameCanvasId = gameCanvasId;
+        cameraVideo = <HTMLVideoElement> Util.findFirstElementFromId(cameraVideoId);
+        if (cameraVideo == null)
+            return { error: "Setup failed: could not find camera's video element \"" + cameraVideoId + "\"" }
+
+        cameraCanvas = <HTMLCanvasElement> Util.findFirstElementFromId(cameraCanvasId);
+        if (cameraCanvas == null)
+            return { error: "Setup failed: could not find camera's canvas element \"" + cameraCanvasId + "\"" }
+
+        debugCanvas = <HTMLCanvasElement> Util.findFirstElementFromId(debugCanvasId);
+        if (debugCanvas == null)
+            return { error: "Setup failed: could not find debug canvas \"" + debugCanvasId + "\"" }
+
+        gameCanvas = <HTMLCanvasElement> Util.findFirstElementFromId(gameCanvasId);
+        if (gameCanvas == null)
+            return { error: "Setup failed: could not find game canvas \"" + gameCanvasId + "\"" }
+
+        camera = new Util.Camera(cameraVideo, cameraCanvas, function(e) {
+            return { error: "Failed to initialize camera with error:" + e.name }
+        });
+        
+        var setCameraDimensions = function(width: number, height: number) {
+            cameraWidth = width;
+            cameraHeight = height;
+        }
+
+        var initializeSteeringAndGame = function() {
+            if (!camera.ready()) {
+                setTimeout(initializeSteeringAndGame, 1000);
+                return;
+            }
+            camera.cropResize(cameraWidth, cameraHeight);
+            camera.start();
+
+            console.log("Preparing to capture skin color...");
+            setTimeout(function() {
+                var rgbData = new Util.RGBData(cameraWidth, cameraHeight);
+                rgbData.setFrame(camera.getFrame());
+                var skinColor = Setup.getAverageColor(rgbData, Math.round(cameraWidth / 3), Math.round(cameraHeight / 3), Math.round(cameraWidth / 3), Math.round(cameraHeight / 3));
+
+                console.log("    Skin color: [r=" + skinColor.r + ", g=" + skinColor.g + ", b=" + skinColor.b + "]");
+                Steering.setDisplayCanvas(debugCanvas);
+                Steering.setup(camera, skinColor);
+                Steering.start(10);
+                Engine.initialize(1, gameCanvas);
+                Engine.step(0);
+            }, 1000);
+        }
+
+        return {
+            setCameraDimensions: setCameraDimensions,
+            initialize: initializeSteeringAndGame
+        }
     }
-
-    public setCameraDimensions(width: number, height: number) {
-        this.cameraWidth = width;
-        this.cameraHeight = height;
-    }
-
-    cameraVideoId: String;
-    cameraCanvasId: String;
-    debugCanvasId: String;
-    gameCanvasId: String;
-    cameraWidth: number = 250;
-    cameraHeight: number = 250;
-}
-
-export function setup(options: SetupOptions): any {
-    cameraVideo = <HTMLVideoElement> findFirstElementFromId(options.cameraVideoId);
-    if (cameraVideo == null)
-        return { error: "Setup failed: could not find camera's video element \"" + options.cameraVideoId + "\"" }
-
-    cameraCanvas = <HTMLCanvasElement> findFirstElementFromId(options.cameraCanvasId);
-    if (cameraCanvas == null)
-        return { error: "Setup failed: could not find camera's canvas element \"" + options.cameraCanvasId + "\"" }
-
-    debugCanvas = <HTMLCanvasElement> findFirstElementFromId(options.debugCanvasId);
-    if (debugCanvas == null)
-        return { error: "Setup failed: could not find debug canvas \"" + options.debugCanvasId + "\"" }
-
-    gameCanvas = <HTMLCanvasElement> findFirstElementFromId(options.gameCanvasId);
-    if (gameCanvas == null)
-        return { error: "Setup failed: could not find game canvas \"" + options.gameCanvasId + "\"" }
-
-    camera = new Util.Camera(cameraVideo, cameraCanvas, function(e) {
-        return { error: "Failed to initialize camera with error:" + e.name }
-    });
-    cameraWidth = options.cameraWidth
-    cameraHeight = options.cameraHeight
-    return { init: initializeSteeringAndGame };
-}
-
-function initializeSteeringAndGame() {
-    if (!camera.ready()) {
-        setTimeout(initializeSteeringAndGame, 1000);
-        return;
-    }
-    camera.cropResize(cameraWidth, cameraHeight);
-    camera.start();
-
-    console.log("Preparing to capture skin color...");
-    setTimeout(function() {
-        var rgbData = new Util.RGBData(cameraWidth, cameraHeight);
-        rgbData.setFrame(camera.getFrame());
-        var skinColor = Setup.getAverageColor(rgbData, Math.round(cameraWidth / 3), Math.round(cameraHeight / 3), Math.round(cameraWidth / 3), Math.round(cameraHeight / 3));
-
-        console.log("    Skin color: [r=" + skinColor.r + ", g=" + skinColor.g + ", b=" + skinColor.b + "]");
-        Steering.setDisplayCanvas(debugCanvas);
-        Steering.setup(camera, skinColor);
-        Steering.start(10);
-        Engine.initialize(1, gameCanvas);
-        Engine.step(0);
-    }, 1000);
-}
-
-function findFirstElementFromId(id: String) {
-    var elementId = id.charAt(0) == "#" ? id : ("#" + id);
-    var matchingElements = <any> $(elementId);
-    return matchingElements.size() == 0 ? null : matchingElements[0];
-}
-
 }

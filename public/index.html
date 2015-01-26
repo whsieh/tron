@@ -57,21 +57,21 @@
           })
         );
 
-        var options = new Coordinator.SetupOptions("webcam_video", "webcam_canvas", "debug_canvas", "game_canvas");
-        options.setCameraDimensions(smallScreenSize.width, smallScreenSize.height);
+        // Setup Tron
+
         var attemptSetupUntilSuccess = function() {
-          tron = Coordinator.setup(options);
+          var tron = Coordinator.create("webcam_video", "webcam_canvas", "debug_canvas", "game_canvas")
           if ("error" in tron) {
             console.log("[-] An error occurred while trying to set up tron. Retrying in 500ms...");
             setTimeout(attemptSetupUntilSuccess, 500);
           } else {
             console.log("[+] Setup successful! Continuing initialization...");
-            tron.init();
+            tron.setCameraDimensions(smallScreenSize.width, smallScreenSize.height);
+            tron.initialize();
           }
         }
         attemptSetupUntilSuccess();
       });
-
 
     </script>
 
