@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- Generator: Adobe Illustrator 16.0.0, SVG Export Plug-In . SVG Version: 6.00 Build 0)  -->
 <!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
-<svg version="1.1" id="Layer_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
+<svg version="1.1" id="bg" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
 	 width="1400px" height="700px" viewBox="0 0 1400 700" enable-background="new 0 0 1400 700" xml:space="preserve">
 <g id="dashboard">
 	<polygon fill="#0D0C1C" points="203.621,698 300.621,601 1099.379,601 1196.379,698 	"/>
@@ -28,7 +28,7 @@
 		c2.761,0,5,2.583,5,5.77V496.23z"/>
 	<rect x="15" y="452" fill="#754C24" width="270" height="25"/>
 	<g id="_x3C_Path_x3E__1_">
-		<path fill="#0D0C1C" d="M275,160v250H25V160H275 M280,155h-5H25h-5v5v250v5h5h250h5v-5V160V155L280,155z"/>
+		<path fill="#0D0C1C" d="M275,220v190H25V220H275 M280,215h-5H25h-5v5v190v5h5h250h5v-5V220V215L280,215z"/>
 	</g>
 </g>
 <g id="left_tv_1_">
@@ -40,7 +40,7 @@
 		c2.762,0,5,2.583,5,5.77V496.23z"/>
 	<rect x="1115" y="452" fill="#754C24" width="270" height="25"/>
 	<g id="_x3C_Path_x3E__3_">
-		<path fill="#0D0C1C" d="M1375,160v250h-250V160H1375 M1380,155h-5h-250h-5v5v250v5h5h250h5v-5V160V155L1380,155z"/>
+		<path fill="#0D0C1C" d="M1375,220v190h-250V220H1375 M1380,215h-5h-250h-5v5v190v5h5h250h5v-5V220V215L1380,215z"/>
 	</g>
 </g>
 <g id="wheel">

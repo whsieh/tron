@@ -7,6 +7,11 @@
     -webkit-transform-origin: @where;
 }
 
+.transform-origin(@x, @y) {
+    transform-origin: @x @y;
+    -webkit-transform-origin: @x @y;
+}
+
 //============================================================
 // Global Variables
 //============================================================
@@ -23,6 +28,7 @@ html, body {
     margin: 0;
     padding: 0;
     background-color: #D8DAE7;
+    overflow: hidden;
 }
 
 video {
@@ -37,8 +43,15 @@ video {
     margin: 0 auto;
 }
 
-svg {
+#bg {
     position: absolute;
+    bottom: 0;
+    .transform-origin(bottom left);
+    z-index: 1;
+}
+
+#canvas {
+    position :absolute;
     bottom: 0;
     .transform-origin(bottom left);
 }
@@ -49,6 +62,14 @@ svg {
 
 .left_screen, .right_screen {
     border: 1px solid black;
+}
+
+//============================================================
+// Steering Wheel
+//============================================================
+
+#wheel {
+    .transform-origin(705.008px, 623.389px)
 }
 
 //============================================================
