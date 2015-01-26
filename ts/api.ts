@@ -28,7 +28,7 @@ module Coordinator {
             return { error: "Setup failed: could not find game canvas \"" + gameCanvasId + "\"" }
 
         camera = new Util.Camera(cameraVideo, cameraCanvas, function(e) {
-            return { error: "Failed to initialize camera with error:" + e.name }
+            console.log("Error: Failed to initialize camera with error:" + e.name);
         });
         
         var setCameraDimensions = function(width: number, height: number) {
@@ -59,9 +59,14 @@ module Coordinator {
             }, 1000);
         }
 
+        var getSteeringAngle = function() {
+            return Steering.theta();
+        }
+
         return {
             setCameraDimensions: setCameraDimensions,
-            initialize: initializeSteeringAndGame
+            initialize: initializeSteeringAndGame,
+            getSteeringAngle: getSteeringAngle
         }
     }
 }

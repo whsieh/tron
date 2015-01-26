@@ -20,6 +20,7 @@
         var $mainScreen = $(".main_screen");
         var $rightScreen = $(".right_screen");
         var $leftScreen = $(".left_screen");
+        var $wheel = $("#wheel")
 
         var smallScreenSize = { width: 250, height: 190 }
         var largeScreenSize = { width: 730, height: 510 }
@@ -58,19 +59,15 @@
         );
 
         // Setup Tron
-
-        var attemptSetupUntilSuccess = function() {
-          var tron = Coordinator.create("webcam_video", "webcam_canvas", "debug_canvas", "game_canvas")
-          if ("error" in tron) {
-            console.log("[-] An error occurred while trying to set up tron. Retrying in 500ms...");
-            setTimeout(attemptSetupUntilSuccess, 500);
-          } else {
-            console.log("[+] Setup successful! Continuing initialization...");
-            tron.setCameraDimensions(smallScreenSize.width, smallScreenSize.height);
-            tron.initialize();
-          }
-        }
-        attemptSetupUntilSuccess();
+        var tron = Coordinator.create("webcam_video", "webcam_canvas", "debug_canvas", "game_canvas")
+        tron.setCameraDimensions(smallScreenSize.width, smallScreenSize.height);
+        tron.initialize();
+        
+        // Check steering angle periodically
+        window.setInterval(function() {
+          $wheel.velocity("stop").velocity({rotateZ: -tron.getSteeringAngle() * 180 / Math.PI + "deg"}, 25)
+        }, 30)
+          
       });
 
     </script>
