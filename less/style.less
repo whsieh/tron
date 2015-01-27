@@ -12,6 +12,11 @@
     -webkit-transform-origin: @x @y;
 }
 
+.transform(@t) {
+    transform: @t;
+    -webkit-transform: @t;   
+}
+
 //============================================================
 // Global Variables
 //============================================================
@@ -62,6 +67,10 @@ video {
 
 .left_screen, .right_screen {
     border: 1px solid black;
+}
+
+.left_screen {
+    .transform(scale(-1, 1));
 }
 
 //============================================================

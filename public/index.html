@@ -36,19 +36,19 @@
           id: "game_canvas",
           width: largeScreenSize.width,
           height: largeScreenSize.height
-        });
+        }).width(largeScreenSize.width).height(largeScreenSize.height);
 
         $leftScreen.attr({
           id: "webcam_canvas",
           width: smallScreenSize.width,
           height: smallScreenSize.height
-        });
+        }).width(smallScreenSize.width).height(smallScreenSize.height);;
 
         $rightScreen.attr({
           id: "debug_canvas",
           width: smallScreenSize.width,
           height: smallScreenSize.height
-        });
+        }).width(smallScreenSize.width).height(smallScreenSize.height);;
 
         $("body").append(
           $("<video />").attr({
