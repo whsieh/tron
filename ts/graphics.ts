@@ -9,21 +9,11 @@ module Graphics {
     }
 
     // Constants
-
-    var COLORS: number[] = [
-        0xFF00FF,
-        0x800000,
-        0x800080,
-        0xFF0000,
-        0x0000FF,
-        0x808000,
-        0x008000,
-        0xFFFF00,
-    ];
+    var PLAYER_COLOR: number = 0xFF00FF;
+    var CAMERA_HEIGHT: number = 25;
+    var CAMERA_FOV: number = 75;
     var HOVER_HEIGHT: number = 4;
     var PLAYER_HEIGHT: number = 6;
-
-    // Interface
 
     export class Engine {
         // Engine state
@@ -33,59 +23,24 @@ module Graphics {
         private camera: any;
 
         // Render state
-        private map: any;
-        private players: Array<any> = [];
-        private trails: Array<any> = [];
+        private player: any;
+        private hiddenPlayer: any;
 
         constructor(state: GameState, gameCanvas: HTMLCanvasElement) {
-            if (state.numPlayers > 8) {
-                throw new Error("Cannot support more than 8 players");
-            }
-
-            var screenWidth = gameCanvas.width;
-            var screenHeight = gameCanvas.height;
             this.state = state;
-            // Setup Scene and Canvas Element
+            this.initializeScene();
+            this.initializeCamera(gameCanvas.width / gameCanvas.height);
+            this.initializeRenderer(gameCanvas);        
+        }
+
+        private initializeScene(): void {
             this.scene = new THREE.Scene();
-            this.camera = new THREE.PerspectiveCamera(75, screenWidth / screenHeight, 0.1, 1000);
-            this.camera.position.z = 25;
-            this.camera.up.set(0, 0, 1);
-            this.renderer = new THREE.CanvasRenderer({canvas: gameCanvas});
-            this.renderer.setSize(screenWidth, screenHeight);
-            this.renderer.setClearColor(0x000000, 1);
-            // Callbacks
-            $(window).resize(function() {
-                if (this.renderer != null && this.camera != null) {
-                    this.renderer.setSize(screenWidth, screenHeight);
-                    this.camera.aspect = screenWidth / screenHeight;
-                    this.camera.updateProjectionMatrix();
-                }
-            });
-
-            // Initialize Map and Players
             this.initializeMap();
-            this.initializePlayers();
-        }
-
-        render(): void {
-            // Restart scene with map
-            this.scene.add(this.map);
-            // Place camera properly
-            this.setCamera();
-            // Render players and trails
-            this.renderPlayers();
-            // this.renderTrails();
-            // Render the result
-
-            this.renderer.render(this.scene, this.camera);
-        }
-
-        gameOver(): void {
-            alert("Game Over");
+            this.initializePlayer();
         }
 
         private initializeMap(): void {
-            var material = new THREE.LineBasicMaterial({color: 0xffffff});
+            // Creates a Data.WIDTH x Data.HEIGHT white grid and adds it to the scene
             var geometry = new THREE.Geometry();
             for (var i = 0; i <= Data.WIDTH; i += 50) {
                 geometry.vertices.push(v3(i, 0, 0));
@@ -97,86 +52,114 @@ module Graphics {
                 geometry.vertices.push(v3(Data.WIDTH, j, 0));
             }
 
-            this.map = new THREE.Line(geometry, material, THREE.LinePieces);
-            this.scene.add(this.map);
+            var material = new THREE.LineBasicMaterial({ color: 0xFFFFFF })
+            var grid = new THREE.Line(geometry, material, THREE.LinePieces);
+            this.scene.add(grid);
         }
 
-        private initializePlayers(): void {
-            var geometry, material;
-
-            geometry = new THREE.Geometry();
+        private initializePlayer(): void {
+            var geometry = new THREE.Geometry();
             geometry.vertices.push(v3(0, 0, 0));
             geometry.vertices.push(v3(6, 0, -20.9));
             geometry.vertices.push(v3(-6, 0, -20.9));
             geometry.vertices.push(v3(-6, -PLAYER_HEIGHT, -20));
             geometry.vertices.push(v3(6, -PLAYER_HEIGHT, -20));
 
+            // Top face
             geometry.faces.push(new THREE.Face3(0, 1, 2));
+            // Left face
             geometry.faces.push(new THREE.Face3(0, 4, 1));
+            // Right face
             geometry.faces.push(new THREE.Face3(0, 2, 3));
+            // Back face
             geometry.faces.push(new THREE.Face3(4, 3, 2));
             geometry.faces.push(new THREE.Face3(4, 2, 1));
 
-            for (var i = 0; i < this.state.players.length; i++) {
-                material = new THREE.MeshBasicMaterial({
-                    color: COLORS[i],
-                    wireframe: true,
-                    wireframeLinewidth: 3
-                });
+            var wireframeMaterial = new THREE.MeshBasicMaterial({
+                color: PLAYER_COLOR,
+                shading: THREE.FlatShading,
+                wireframe: true,
+                wireframeLinewidth: 3
+            });
 
-                this.players[i] = new THREE.Mesh(geometry, material);
-                this.players[i].position.z = HOVER_HEIGHT + PLAYER_HEIGHT;
-                this.players[i].up.set(0, 0, 1);
+            var hiddenObjectMaterial = new THREE.MeshBasicMaterial({
+                color: 0x000000,
+                shading: THREE.FlatShading
+            });
 
-                this.scene.add(this.players[i]);
-            }
+            this.player = new THREE.Mesh(geometry.clone(), wireframeMaterial);
+            this.player.position.z = HOVER_HEIGHT + PLAYER_HEIGHT;
+            this.player.up.set(0, 0, 1);
+            this.scene.add(this.player);
+
+            // Create Hidden Player
+            this.hiddenPlayer = new THREE.Mesh(geometry.clone(), hiddenObjectMaterial);
+            this.hiddenPlayer.position.z = HOVER_HEIGHT + PLAYER_HEIGHT;
+            this.hiddenPlayer.up.set(0, 0, 1);
+            this.scene.add(this.hiddenPlayer);
+        }
+
+        private initializeCamera(aspectRatio: number): void {
+            this.camera = new THREE.PerspectiveCamera(CAMERA_FOV, aspectRatio, 0.1, 1000);
+            this.camera.position.z = CAMERA_HEIGHT;
+            this.camera.up.set(0, 0, 1);
+        }
+
+        private initializeRenderer(canvas: HTMLCanvasElement): void {
+            this.renderer = new THREE.WebGLRenderer({
+                canvas: canvas,
+                antialias: true, 
+                precision: "highp"
+            });
+            this.renderer.setClearColor("black");
+        }
+
+        public render(): void {
+            // Place camera properly
+            this.setCamera();
+            // Render players and trails
+            this.renderPlayers();
+            // Render the result
+
+            this.renderer.render(this.scene, this.camera);
+        }
+
+        public gameOver(): void {
+            alert("Game Over");
         }
 
         private renderPlayers() : void {
-            var player, pos, dir, up, normalizedTheta;
+            var nextState = this.state.players[0];
 
-            for (var i = 0; i < this.state.players.length; i++) {
-                player = this.state.players[i];
-                if (!player.isDead) {
+            // Updated values
+            var pos = nextState.curPos;
+            var dir = nextState.dir;
+            var theta = nextState.normalizedTheta;
 
-                    // If player still alive, render!
-                    pos = player.curPos;
-                    dir = player.dir;
+            // Place player in the right position
+            this.player.position.x = pos.x;
+            this.player.position.y = pos.y;
+            this.hiddenPlayer.position.x = pos.x;
+            this.hiddenPlayer.position.y = pos.y;
 
-                    normalizedTheta = player.normalizedTheta;
+            // Tilt
+            var up = v3(0, 0, 1).applyAxisAngle(dir, -theta * Math.PI / 4);
+            this.player.up.set(up.x, up.y, up.z);
+            this.hiddenPlayer.up.set(up.x, up.y, up.z);
 
-                    // Place player in the right position
-                    this.players[i].position.x = pos.x;
-                    this.players[i].position.y = pos.y;
-
-                    // Tilt
-                    up = v3(0, 0, 1).applyAxisAngle(dir, -normalizedTheta * Math.PI / 4)
-                    this.players[i].up.set(up.x, up.y, up.z);
-
-
-                    // Point player in the right direction
-                    this.players[i].lookAt(v3(pos.x + dir.x * 50, pos.y + dir.y * 50,
-                        PLAYER_HEIGHT + HOVER_HEIGHT - 8));
-                }
-            }
-        }
-
-        private renderTrails(): void {
-            var geometry, material, trail, trailPoint;
-            for (var i = 0; i < this.state.players.length; i++) {
-                geometry = new THREE.Geometry();
-                material = new THREE.LineBasicMaterial({color: COLORS[i]});
-                // Add every trail
-                for (var c = 0; c < this.state.players[i].trail.length; c++) {
-                    trailPoint = this.state.players[i].trail[c];
-
-                    geometry.vertices.push(v3(trailPoint.x, trailPoint.y, HOVER_HEIGHT));
-                    geometry.vertices.push(v3(trailPoint.x, trailPoint.y,
-                        PLAYER_HEIGHT + HOVER_HEIGHT));
-                }
-
-                this.scene.add(new THREE.Line(geometry, material, THREE.LinePieces));
-            }
+            // Point player in the right direction
+            this.player.lookAt(v3(
+                pos.x + dir.x * 50, 
+                pos.y + dir.y * 50,
+                PLAYER_HEIGHT + HOVER_HEIGHT - 8
+                )
+            );
+            this.hiddenPlayer.lookAt(v3(
+                pos.x + dir.x * 50, 
+                pos.y + dir.y * 50,
+                PLAYER_HEIGHT + HOVER_HEIGHT - 8
+                )
+            );
         }
 
         private setCamera(): void {
