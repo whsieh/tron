@@ -32,7 +32,6 @@ module Engine {
 
    var start: number = null;
    export function step(timestamp: number) {
-        console.log("Updating timestep: " + timestamp);
         var dt: number;
         if (start == null) start = timestamp;
         dt = timestamp - start;
