@@ -18,26 +18,32 @@ module Steering {
     var skinColor: Util.Color = null;
     var rgbData: Util.RGBData = null;
     var canvas: HTMLCanvasElement = null;
+    var lastKnownLeftAvgPixel: Pixel;
+    var lastKnownRightAvgPixel: Pixel;
 
-    var rawThetaWindow: number[] = [];
-    var thetaWindowSize: number;
-    var currentWindowOffset: number = 0;
+    var isCurrentlyDetectingHands: boolean;
     var samplingStride: number;
     var id = null;
+    var currentRawTheta: number;
+    var minPointCountThreshold: number;
+    var updateAlpha:number; // alpha = 1 means we only consider the most recent theta.
+                            // alpha = 0 means we'll use very first theta for the rest of eternity.
 
     //============================================================
     // Functions that control the steering module
     //============================================================
 
-    export function setup(_camera: Util.Camera, _skinColor: Util.Color, _thetaWindowSize: number = 5, _samplingStride: number = 2) {
+    export function setup(_camera: Util.Camera, _skinColor: Util.Color, _updateAlpha: number = 0.75, _samplingStride: number = 2, _minPointCountThreshold: number = 10) {
         camera = _camera;
         skinColor = _skinColor;
         rgbData = new Util.RGBData(camera.width(), camera.height());
-        thetaWindowSize = _thetaWindowSize;
-        for (var i = 0; i < thetaWindowSize; i++) {
-            rawThetaWindow.push(0);
-        }
+        updateAlpha = _updateAlpha
         samplingStride = _samplingStride;
+        minPointCountThreshold = _minPointCountThreshold;
+        currentRawTheta = 0;
+        lastKnownLeftAvgPixel = {x: 0, y: 0};
+        lastKnownRightAvgPixel = {x: 0, y: 0};
+        isCurrentlyDetectingHands = false;
     }
 
     // If camera or skinColor is not set, or camera is not ready, return immediately. Otherwise, start
@@ -61,32 +67,34 @@ module Steering {
         return skinColor;
     }
 
+    export function isActivelySteering(): boolean {
+        return isCurrentlyDetectingHands;
+    }
+
     function calculateSteeringTheta() {
         rgbData.setFrame(camera.getFrame());
 
         var color: Util.Color = new Util.Color();
         var dist: number;
+        var halfWidth: number = rgbData.width / 2;
 
         var skinPixels: Pixel[] = [];
-        var skinColorThreshold: number = 1000;
+        var baseSkinColorThreshold: number = 1500;
 
         // Gathering skin pixels
         for (var i = 0; i < rgbData.width; i += samplingStride) {
+            var centerDistanceCoefficient: number = Math.abs(i - halfWidth) / halfWidth;
             for (var j = 0; j < rgbData.height; j += samplingStride) {
                 rgbData.getPixelColor(i, j, color);
-                dist = Math.pow(color.r - skinColor.r, 2)
-                    + Math.pow(color.g - skinColor.g, 2)
-                    + Math.pow(color.b - skinColor.b, 2);
-                if (dist < skinColorThreshold) {
+                dist = Math.pow(color.r - skinColor.r, 2) + Math.pow(color.g - skinColor.g, 2) + Math.pow(color.b - skinColor.b, 2);
+                if (dist < baseSkinColorThreshold * centerDistanceCoefficient)
                     skinPixels.push({x: i, y: j});
-                }
             }
         }
 
         // Finding average skin pixel positions, assuming screen split in half
         var leftAvgPixel: Pixel = {x: 0, y: 0};
         var rightAvgPixel: Pixel = {x: 0, y: 0};
-        var halfI: number = rgbData.width / 2;
         var pixel: Pixel;
 
         var leftPixelCount = 0;
@@ -94,7 +102,7 @@ module Steering {
         for (var i = 0; i < skinPixels.length; i++) {
             pixel = skinPixels[i];
 
-            if (pixel.x < halfI) {
+            if (pixel.x < halfWidth) {
                 leftAvgPixel.x += pixel.x;
                 leftAvgPixel.y += pixel.y;
                 leftPixelCount++;
@@ -104,18 +112,23 @@ module Steering {
                 rightPixelCount++;
             }
         }
+        isCurrentlyDetectingHands = leftPixelCount >= minPointCountThreshold && rightPixelCount >= minPointCountThreshold;
+        if (isCurrentlyDetectingHands) {
+            leftAvgPixel.x /= leftPixelCount;
+            leftAvgPixel.y /= leftPixelCount;
+            rightAvgPixel.x /= rightPixelCount;
+            rightAvgPixel.y /= rightPixelCount;
+            lastKnownLeftAvgPixel = leftAvgPixel;
+            lastKnownRightAvgPixel = rightAvgPixel;
 
-        leftAvgPixel.x /= leftPixelCount;
-        leftAvgPixel.y /= leftPixelCount;
-        rightAvgPixel.x /= rightPixelCount;
-        rightAvgPixel.y /= rightPixelCount;
-
-        var currentRawTheta = 0;
-        if (rightAvgPixel.x != leftAvgPixel.x) {
-            currentRawTheta = Math.asin((rightAvgPixel.y - leftAvgPixel.y) / (rightAvgPixel.x - leftAvgPixel.x));
+            var updatedRawTheta = 0;
+            if (rightAvgPixel.x != leftAvgPixel.x) {
+                updatedRawTheta = Math.asin((rightAvgPixel.y - leftAvgPixel.y) / (rightAvgPixel.x - leftAvgPixel.x));
+            }
+            updatedRawTheta = (updateAlpha * updatedRawTheta) + ((1 - updateAlpha) * currentRawTheta);
+            if (!isNaN(updatedRawTheta) && isFinite(updatedRawTheta))
+                currentRawTheta = updatedRawTheta;
         }
-        rawThetaWindow[currentWindowOffset] = currentRawTheta;
-        currentWindowOffset = (currentWindowOffset + 1) % thetaWindowSize;
 
         if (canvas != null) {
             var context = canvas.getContext("2d");
@@ -123,11 +136,11 @@ module Steering {
             context.fillStyle = "rgb(0, 0, 0)";
             for (var i = 0; i < skinPixels.length; i++) {
                 pixel = skinPixels[i];
-                context.fillRect(pixel.x - 1, pixel.y- 1, 3, 3);
+                context.fillRect(rgbData.width - pixel.x + 1, pixel.y - 1, 3, 3);
             }
             context.fillStyle = "rgb(255, 0, 0)";
-            context.fillRect(leftAvgPixel.x - 2, leftAvgPixel.y - 2, 5, 5);
-            context.fillRect(rightAvgPixel.x - 2, rightAvgPixel.y - 2, 5, 5);
+            context.fillRect(rgbData.width - lastKnownLeftAvgPixel.x + 2, lastKnownLeftAvgPixel.y - 2, 5, 5);
+            context.fillRect(rgbData.width - lastKnownRightAvgPixel.x + 2, lastKnownRightAvgPixel.y - 2, 5, 5);
         }
     }
 
@@ -136,10 +149,6 @@ module Steering {
     }
 
     export function theta(): number {
-        var rawThetaSum: number = 0;
-        for (var i = 0; i < thetaWindowSize; i++) {
-            rawThetaSum += rawThetaWindow[i];
-        }
-        return rawThetaSum / thetaWindowSize;
+        return currentRawTheta;
     }
 }
