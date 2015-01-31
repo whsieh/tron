@@ -11,101 +11,54 @@ module Engine {
     var FINE_SCALE: number = 4;                 //The scaling of finer grid used for collision compared to the grid
                                                 //used for graphic
     var SPEED: number = 1.6 / TIMESTEP;         //The speed of all player in coarse grid per millisecond.
-    var DELTA_THETA: number = 0.5 / TIMESTEP;   //Turning speed in degree per millisecond.
-    var MAX_THETA = 4;                          //The maximum degree a player can turn.
+    var DELTA_THETA: number = Util.degreeToRadian(0.5) / TIMESTEP;   //Turning speed in radian per millisecond.
+    var MAX_THETA = Util.degreeToRadian(4);                          //The maximum radian a player can turn.
 
-    var obstacles = {};         //The grid for obstacles is on a finer scale than that for player pos
     var gameState: GameState;
     var graphicEngine: Graphics.Engine;
 
-    export function initialize(numPlayers: number, gameCanvas: HTMLCanvasElement) {
-        gameState = newGameState(numPlayers);
+    export function initialize(gameCanvas: HTMLCanvasElement) {
+        gameState = initializeGameState();
         graphicEngine = new Graphics.Engine(gameState, gameCanvas);
-        //Add the starting position of each player to obstacles
-        var player: Player;
-        for (var i = 0; i < gameState.numPlayers; i++) {
-            player = gameState.players[i];
-            obstacles[i] = {};
-            addObstacle(i, scaleToFine(player.curPos));
-        }
+        var player = gameState.player;
     }
 
-   var start: number = null;
-   export function step(timestamp: number) {
-        var dt: number;
-        if (start == null) start = timestamp;
-        dt = timestamp - start;
-        start = timestamp;
+    var start: number = null;
+    export function step(timestamp: number) {
+        if (!gameState.isGameOver) {
+            var dt: number;
+            if (start == null) start = timestamp;
+            dt = timestamp - start;
+            start = timestamp;
 
-        //Clear recently dead
-        gameState.recentlyDead.length = 0;
+            var player = gameState.player;
 
-        //Get player input for player 0 and update its normalized theta
-        if (!gameState.players[0].isDead) {
-            gameState.players[0].normalizedTheta = Steering.theta();
-        }
+            //Get player input for player and update its normalized theta
+            player.normalizedTheta = Steering.theta();
 
-        //Update the normalized theta for all other players
-        for (var i = 1; i < gameState.numPlayers; i++) {
-            if (!gameState.players[i].isDead)
-                gameState.players[i].normalizedTheta = AINormalizedTheta(i, gameState.players[i]);
-        }
+            var line: Point[];
+            var nextPos: Point;
 
-        var line: Point[];
-        var player: Player;
-        var nextPos: Point;
-
-        for (var i = 0; i < gameState.numPlayers; i++) {
-            player = gameState.players[i];
-            if (player.isDead)
-                continue;
             updateDir(player, dt);
             nextPos = move(player, dt);
 
             line = getLine(scaleToFine(player.curPos), scaleToFine(nextPos));
             for (var j = 0; j < line.length; j++) {
                 if (isCollided(line[j])) {
-                    gameState.recentlyDead.push(i);
+                    gameOver();
                     break;
-                } else {
-                    addObstacle(i, line[j]);
                 }
             }
+            player.curPos = nextPos;
 
-            var len:number = gameState.recentlyDead.length;
-            if (len == 0 || gameState.recentlyDead[len-1] != i) {
-                line = getLine(player.curPos, nextPos);
-                for (var j = 0; j < line.length; j++) {
-                    player.trail.push(line[j]);
-                }
-                player.curPos = nextPos;
-            }
         }
-
-        //Update the status of players who died this step
-        for (var i = 0; i < gameState.recentlyDead.length; i++) {
-            gameState.players[gameState.recentlyDead[i]].isDead = true;
-        }
-
-        var numPlayerAlive: number = 0;
-        for (var i = 0; i < gameState.numPlayers; i++) {
-            if (!gameState.players[i].isDead)
-                numPlayerAlive++;
-        }
-
-        if (numPlayerAlive >= 1)
-            graphicEngine.render();
-        else
-            graphicEngine.gameOver();
+        graphicEngine.render();
         requestAnimationFrame(step);
-   }
-
-    function degreeToRadian(deg: number): number {
-        return deg * Math.PI / 180;
     }
-    DELTA_THETA = degreeToRadian(DELTA_THETA);
-    MAX_THETA = degreeToRadian(MAX_THETA);
-    var count = 0;
+
+    function gameOver() {
+        graphicEngine.gameOver();
+    }
 
     function newPoint(X: number, Y: number): Point {
         return {x: X, y: Y};
@@ -113,36 +66,15 @@ module Engine {
 
     // Return a random starting position and orientation for a player.
     function randomStart(): {pos: Point; dir: Vector3} {
-        //stub for now, change later
-        if (count == 0) {
-            count++;
-            return {pos: newPoint(50, 50), dir: new Vector3(3, 5, 0)};
-        }
-        else
-            return {pos: newPoint(WIDTH-50, HEIGHT-50), dir: new Vector3(-1, -4, 0)};
+        return {pos: newPoint(50, 50), dir: new Vector3(3, 5, 0)};
     }
 
-    function newPlayer(curPos: Point, normalizedTheta: number, dir: Vector3): Player {
-        var player: Player = new Player();
-        player.curPos = curPos;
-        player.curTheta = 0;
-        player.normalizedTheta = normalizedTheta;
-        player.dir = dir.normalize();
-        player.isDead = false;
-        player.trail = new Array<Point> ();
-        return player;
-    }
-
-    function newGameState(numPlayers: number): GameState {
+    function initializeGameState(): GameState {
         var gs: GameState = new GameState();
-        gs.numPlayers = numPlayers;
-        gs.players = new Array<Player> ();
         var tmp;
-        for (var i = 0; i < numPlayers; i++) {
-            tmp = randomStart();
-            gs.players.push(newPlayer(tmp["pos"], 0, tmp["dir"]));
-        }
-        gs.recentlyDead = new Array<number> ();
+        tmp = randomStart();
+        gs.player = new Player(tmp["pos"], 0, tmp["dir"]);
+        gs.isGameOver = false;
         return gs;
     }
 
@@ -155,16 +87,11 @@ module Engine {
         return {x: p.x * FINE_SCALE, y: p.y * FINE_SCALE};
     }
 
-    //Given a point on fine grid, add an obstacle at that positon
-    function addObstacle(playerID: number, p: Point): void {
-        obstacles[playerID][pointToString(p)] = true;
-    }
-
     var zaxis: Vector3 = new Vector3(0, 0, 1);
     //Calculate the new position in coarse grid given current position (in coarse grid), orientation
     //and time elapsed.
     function move(player: Player, dt: number): Point {
-        var distance: number = SPEED * dt;    //Distance traveled in dt milliseconds in coarse grid
+        var distance: number = SPEED * dt;    //Distance traveled in dt milliseconds on coarse grid
         var pos: Point = player.curPos;
         var dir: Vector3 = player.dir;
         player.dir.applyAxisAngle(zaxis, player.curTheta);
@@ -261,10 +188,6 @@ module Engine {
         return res;
    }
 
-   function AINormalizedTheta(playerID: number, player: Player): number {
-        //a stub that do nothing for now
-        return 0;
-   }
 }
 
 

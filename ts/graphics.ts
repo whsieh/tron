@@ -129,7 +129,7 @@ module Graphics {
         }
 
         private renderPlayers() : void {
-            var nextState = this.state.players[0];
+            var nextState = this.state.player;
 
             // Updated values
             var pos = nextState.curPos;
@@ -163,8 +163,8 @@ module Graphics {
         }
 
         private setCamera(): void {
-            var pos = this.state.players[0].curPos;
-            var dir = this.state.players[0].dir;
+            var pos = this.state.player.curPos;
+            var dir = this.state.player.dir;
 
             // Magic number for camera setting.
             this.camera.position.x = pos.x - dir.x * 50;

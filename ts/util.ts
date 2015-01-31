@@ -6,6 +6,11 @@ module Util {
     // General helper functions
     //============================================================
 
+    // Convert degree to radian.
+    export function degreeToRadian(deg: number): number {
+        return deg * Math.PI / 180;
+    }
+
     // Simple helper to bind a context with a function
     export function bind(ctx, func) {
         return function() {

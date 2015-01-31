@@ -54,7 +54,7 @@ module Coordinator {
                 Steering.setDisplayCanvas(debugCanvas);
                 Steering.setup(camera, skinColor);
                 Steering.start(10);
-                Engine.initialize(1, gameCanvas);
+                Engine.initialize(gameCanvas);
                 Engine.step(0);
             }, 1000);
         }
