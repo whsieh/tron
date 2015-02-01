@@ -17,19 +17,27 @@ Data:
 
     class GameState:
 
-        numPlayers: number;
-        players: Player[];
-        recentlyDead: number[];
+        player: Player;
+        obstacles: MapObject[];
+        goal: MapObject;
+        score: number;                          //Number of times the game is won.
+        isGameOver: boolean;
 
     class Player:
 
         curPos: Point;
         curTheta: number;
         normalizedTheta: number;
-        isDead: boolean;
-        trail: Point[];
-        dir: Three.Vector3;  // The direction vector a player is facing
+        dir: THREE.Vector3;
+        /* The base (bottom) of the player is a triangle with the tip at CURPOS. */
+        length: number = 21;                    //The height of the triangular base.
+        width: number = 12;                     //The width of the triangular base.
 
+Engine:
+
+    initialize(gameCanvas: HTMLCanvasElement);
+    step(timestamp: number);
+    restartGame();
 
 Graphics:
 
