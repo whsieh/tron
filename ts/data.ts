@@ -1,6 +1,6 @@
 module Data {
-    export var WIDTH: number = 1000;            //The width of the map.
-    export var HEIGHT: number = 1000;           //The height of the map.
+    export var WIDTH: number = 1000;            //The width of the map in terms of map unit.
+    export var HEIGHT: number = 1000;           //The height of the map in terms of map unit.
 
     export var GRID_WIDTH: number = 20;         //The width of the map in terms of number of grids.
     export var GRID_HEIGHT: number = 20;        //The height of the map in terms of number of grids.
