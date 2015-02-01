@@ -5,6 +5,10 @@ module Data {
     export var GRID_WIDTH: number = 20;         //The width of the map in terms of number of grids.
     export var GRID_HEIGHT: number = 20;        //The height of the map in terms of number of grids.
 
+    /* The base (bottom) of the player is a triangle with the tip at the player's current position. */
+    export var PLAYER_LENGTH: number = 21;      //The height of the triangular base.
+    export var PLAYER_WIDTH: number = 12;       //The width of the triangular base.
+
 
     export interface Point {
         x: number;
@@ -16,9 +20,6 @@ module Data {
         curTheta: number;
         normalizedTheta: number;
         dir: THREE.Vector3;
-        /* The base (bottom) of the player is a triangle with the tip at CURPOS. */
-        length: number = 21;                    //The height of the triangular base.
-        width: number = 12;                     //The width of the triangular base.
 
         constructor(curPos: Point, normalizedTheta: number, dir: THREE.Vector3) {
             this.curPos = curPos;
