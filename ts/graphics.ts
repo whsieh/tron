@@ -115,11 +115,8 @@ module Graphics {
         }
 
         public render(): void {
-            // Place camera properly
-            this.setCamera();
-            // Render players and trails
-            this.renderPlayers();
-            // Render the result
+            this.setupCamera();
+            this.setupPlayer();
 
             this.renderer.render(this.scene, this.camera);
         }
@@ -128,8 +125,13 @@ module Graphics {
             alert("Game Over");
         }
 
+<<<<<<< HEAD
         private renderPlayers() : void {
             var nextState = this.state.player;
+=======
+        private setupPlayer() : void {
+            var nextState = this.state.players[0];
+>>>>>>> Renamed some methods in graphics.ts.
 
             // Updated values
             var pos = nextState.curPos;
@@ -162,7 +164,7 @@ module Graphics {
             );
         }
 
-        private setCamera(): void {
+        private setupCamera(): void {
             var pos = this.state.player.curPos;
             var dir = this.state.player.dir;
 
