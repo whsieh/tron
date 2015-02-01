@@ -129,9 +129,11 @@ module Engine {
 
             var hitbox = player.getHitBox();
             for (var i = 0; i < hitbox.length; i++) {
-                if (isInBound(hitbox[i]))
+                if (!isInBound(hitbox[i]))
                     continue;
                 var p = mapToCollision(hitbox[i]);
+                if (!isInBound(p, GRID_WIDTH, GRID_HEIGHT, 0))
+                    continue;
                 var obj: CollisionObject = collisionObjects[p.x][p.y];
                 if (obj != null && obj.isCollided(player))
                     obj.handleCollision(player);
@@ -261,8 +263,9 @@ module Engine {
         return Math.floor(p.x) + "," + Math.floor(p.y);
     }
 
-    function isInBound(pos: Point, width: number = WIDTH, height: number = HEIGHT) {
-        return (0 <= pos.x && pos.x < width) && (0 <= pos.y && pos.y < height);
+    function isInBound(pos: Point, width: number = WIDTH, height: number = HEIGHT, margin: number = 3) {
+        return (-margin <= pos.x && pos.x < width + margin) &&
+             (-margin <= pos.y && pos.y < height + margin);
     }
 
     /* Convert a point on overall map to the corresponding point on collision grid. */
