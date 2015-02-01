@@ -79,21 +79,21 @@ module Graphics {
                 shading: THREE.FlatShading,
             });
 
-            // for (var i = 0; i <= this.state.obstacles.length; i++) {
-            //     var obstaclePos  = this.state.obstacles[i].pos;
+            for (var i = 0; i < this.state.obstacles.length; i++) {
+                var obstaclePos  = this.state.obstacles[i].pos;
 
-            //     var obstacle = new THREE.Mesh(geometry, wireframeMaterial);
-            //     obstacle.position.x = obstaclePos.x + obstacleWidth / 2;
-            //     obstacle.position.y = obstaclePos.y + obstacleWidth / 2;
-            //     obstacle.position.z = OBSTACLE_HEIGHT / 2;
-            //     this.scene.add(obstacle);                
+                var obstacle = new THREE.Mesh(geometry, wireframeMaterial);
+                obstacle.position.x = obstaclePos.x + obstacleWidth / 2;
+                obstacle.position.y = obstaclePos.y + obstacleWidth / 2;
+                obstacle.position.z = OBSTACLE_HEIGHT / 2;
+                this.scene.add(obstacle);                
 
-            //     var hiddenObstacle = new THREE.Mesh(geometry, hiddenMaterial)
-            //     hiddenObstacle.position.x = obstaclePos.x + obstacleWidth / 2;
-            //     hiddenObstacle.position.y = obstaclePos.y + obstacleWidth / 2;
-            //     hiddenObstacle.position.z = OBSTACLE_HEIGHT / 2;
-            //     this.scene.add(hiddenObstacle)
-            // }
+                var hiddenObstacle = new THREE.Mesh(geometry, hiddenMaterial)
+                hiddenObstacle.position.x = obstaclePos.x + obstacleWidth / 2;
+                hiddenObstacle.position.y = obstaclePos.y + obstacleWidth / 2;
+                hiddenObstacle.position.z = OBSTACLE_HEIGHT / 2;
+                this.scene.add(hiddenObstacle)
+            }
         }
 
         private initializeGoal(): void {
