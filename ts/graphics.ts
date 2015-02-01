@@ -14,6 +14,7 @@ module Graphics {
     var CAMERA_FOV: number = 75;
     var HOVER_HEIGHT: number = 4;
     var PLAYER_HEIGHT: number = 6;
+    var OBSTACLE_HEIGHT: number = 25;
 
     export class Engine {
         // Engine state
@@ -44,23 +45,55 @@ module Graphics {
         private initializeMap(): void {
             // Creates a Data.WIDTH x Data.HEIGHT white grid and adds it to the scene
             var geometry = new THREE.Geometry();
-            for (var i = 0; i <= Data.WIDTH; i += 50) {
+            var mapGridWidth = Data.WIDTH / Data.GRID_WIDTH;
+            var mapGridDepth = Data.HEIGHT / Data.GRID_HEIGHT;
+            for (var i = 0; i <= Data.WIDTH; i += mapGridWidth) {
                 geometry.vertices.push(v3(i, 0, 0));
                 geometry.vertices.push(v3(i, Data.HEIGHT, 0));
             }
 
-            for (var j = 0; j <= Data.HEIGHT; j+= 50) {
+            for (var j = 0; j <= Data.HEIGHT; j+= mapGridDepth) {
                 geometry.vertices.push(v3(0, j, 0));
                 geometry.vertices.push(v3(Data.WIDTH, j, 0));
             }
 
-            var material = new THREE.LineBasicMaterial({ color: 0xFFFFFF })
+            var material = new THREE.LineBasicMaterial({ color: 0xFFFFFF });
             var grid = new THREE.Line(geometry, material, THREE.LinePieces);
             this.scene.add(grid);
         }
 
         private initializeObstacles(): void {
+            var obstacleWidth = Data.WIDTH / Data.GRID_WIDTH;
+            var obstacleDepth = Data.HEIGHT / Data.GRID_HEIGHT;
 
+            var geometry = new THREE.BoxGeometry(obstacleWidth, obstacleDepth, OBSTACLE_HEIGHT);
+
+            var wireframeMaterial = new THREE.MeshBasicMaterial({ 
+                color: 0xFF0000,
+                shading: THREE.FlatShading,
+                wireframe: true,
+                wireframeLinewidth: 2
+            });
+            var hiddenMaterial = new THREE.MeshBasicMaterial({ 
+                color: 0x000000,
+                shading: THREE.FlatShading,
+            });
+
+            // for (var i = 0; i <= this.state.obstacles.length; i++) {
+            //     var obstaclePos  = this.state.obstacles[i].pos;
+
+            //     var obstacle = new THREE.Mesh(geometry, wireframeMaterial);
+            //     obstacle.position.x = obstaclePos.x + obstacleWidth / 2;
+            //     obstacle.position.y = obstaclePos.y + obstacleWidth / 2;
+            //     obstacle.position.z = OBSTACLE_HEIGHT / 2;
+            //     this.scene.add(obstacle);                
+
+            //     var hiddenObstacle = new THREE.Mesh(geometry, hiddenMaterial)
+            //     hiddenObstacle.position.x = obstaclePos.x + obstacleWidth / 2;
+            //     hiddenObstacle.position.y = obstaclePos.y + obstacleWidth / 2;
+            //     hiddenObstacle.position.z = OBSTACLE_HEIGHT / 2;
+            //     this.scene.add(hiddenObstacle)
+            // }
         }
 
         private initializeGoal(): void {
@@ -69,11 +102,14 @@ module Graphics {
 
         private initializePlayer(): void {
             var geometry = new THREE.Geometry();
+            var dx = Data.PLAYER_WIDTH / 2
+            var dy = Data.PLAYER_LENGTH
+
             geometry.vertices.push(v3(0, 0, 0));
-            geometry.vertices.push(v3(6, 0, -20.9));
-            geometry.vertices.push(v3(-6, 0, -20.9));
-            geometry.vertices.push(v3(-6, -PLAYER_HEIGHT, -20));
-            geometry.vertices.push(v3(6, -PLAYER_HEIGHT, -20));
+            geometry.vertices.push(v3(dx, 0, -dy));
+            geometry.vertices.push(v3(-dx, 0, -dy));
+            geometry.vertices.push(v3(-dx, -PLAYER_HEIGHT, -dy + 1));
+            geometry.vertices.push(v3(dx, -PLAYER_HEIGHT, -dy + 2));
 
             // Top face
             geometry.faces.push(new THREE.Face3(0, 1, 2));
@@ -102,7 +138,6 @@ module Graphics {
             this.player.up.set(0, 0, 1);
             this.scene.add(this.player);
 
-            // Create Hidden Player
             this.hiddenPlayer = new THREE.Mesh(geometry.clone(), hiddenObjectMaterial);
             this.hiddenPlayer.position.z = HOVER_HEIGHT + PLAYER_HEIGHT;
             this.hiddenPlayer.up.set(0, 0, 1);
