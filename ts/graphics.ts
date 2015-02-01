@@ -36,6 +36,8 @@ module Graphics {
         private initializeScene(): void {
             this.scene = new THREE.Scene();
             this.initializeMap();
+            this.initializeObstacles();
+            this.initializeGoal();
             this.initializePlayer();
         }
 
@@ -55,6 +57,14 @@ module Graphics {
             var material = new THREE.LineBasicMaterial({ color: 0xFFFFFF })
             var grid = new THREE.Line(geometry, material, THREE.LinePieces);
             this.scene.add(grid);
+        }
+
+        private initializeObstacles(): void {
+
+        }
+
+        private initializeGoal(): void {
+
         }
 
         private initializePlayer(): void {
@@ -121,17 +131,16 @@ module Graphics {
             this.renderer.render(this.scene, this.camera);
         }
 
-        public gameOver(): void {
-            alert("Game Over");
+        public goalReached(nextLevel:()=>void): void {
+            nextLevel()
         }
 
-<<<<<<< HEAD
-        private renderPlayers() : void {
-            var nextState = this.state.player;
-=======
+        public gameOver(restartGame:()=>void): void {
+            restartGame()
+        }
+
         private setupPlayer() : void {
-            var nextState = this.state.players[0];
->>>>>>> Renamed some methods in graphics.ts.
+            var nextState = this.state.player;
 
             // Updated values
             var pos = nextState.curPos;

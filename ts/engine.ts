@@ -56,8 +56,12 @@ module Engine {
         requestAnimationFrame(step);
     }
 
+    function restartGame(): void {
+
+    }
+
     function gameOver() {
-        graphicEngine.gameOver();
+        graphicEngine.gameOver(restartGame);
     }
 
     function newPoint(X: number, Y: number): Point {
