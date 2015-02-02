@@ -112,6 +112,8 @@ module Util {
         private destinationWidth: number;
         private destinationHeight: number;
 
+        private renderCameraOverlay: (context: CanvasRenderingContext2D) => void;
+
         constructor(video: HTMLVideoElement, canvas: HTMLCanvasElement, errorHandler: any) {
             if (!hasGetUserMedia)
                 return errorHandler({name: "Unsupported"});
@@ -127,9 +129,14 @@ module Util {
                 this.isReady = true;
             }));
 
+            this.renderCameraOverlay = null;
             this.video = video;
             this.canvas = canvas;
             this.context = canvas.getContext("2d");
+        }
+
+        setRenderCameraOverlay(renderCameraOverlay: (context: CanvasRenderingContext2D) => void): void {
+            this.renderCameraOverlay = renderCameraOverlay;
         }
 
         setDisplayCanvas(canvas: HTMLCanvasElement): void {
@@ -157,8 +164,10 @@ module Util {
             var sx: number = (this.video.videoWidth - this.sourceWidth) / 2;
             var sy: number = (this.video.videoHeight - this.sourceHeight) / 2;
 
-            this.context.drawImage(this.video, sx, sy, this.sourceWidth, this.sourceHeight,
-                0, 0, this.destinationWidth, this.destinationHeight);
+            this.context.drawImage(this.video, sx, sy, this.sourceWidth, this.sourceHeight, 0, 0, this.destinationWidth, this.destinationHeight);
+            if (this.renderCameraOverlay != null)
+                this.renderCameraOverlay(this.context);
+
             if (this.isCapturing)
                 requestAnimationFrame(bind(this, this.draw));
         }

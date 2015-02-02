@@ -46,7 +46,6 @@
           height: largeScreenSize.height
         }).width(largeScreenSize.width).height(largeScreenSize.height);
 
-
         $leftScreen.attr({
           id: "webcam_canvas",
           width: smallScreenSize.width,
@@ -69,15 +68,21 @@
 
         // Setup Tron
         var tron = Coordinator.create("webcam_video", "setup_canvas", "webcam_canvas", "game_canvas", "debug_canvas");
-        tron.setCameraDimensions(smallScreenSize.width, smallScreenSize.height);
-        tron.setGameRendererDimensions(largeScreenSize.width, largeScreenSize.height);
+        tron.setLargeScreenDimensions(largeScreenSize.width, largeScreenSize.height);
+        tron.setSmallScreenDimensions(smallScreenSize.width, smallScreenSize.height);
         tron.initialize();
+        tron.setSkinCaptureRegion(Math.round(largeScreenSize.width / 3),
+          Math.round(largeScreenSize.height / 3),
+          Math.round(largeScreenSize.width / 3),
+          Math.round(largeScreenSize.height / 3));
+        $(window).keypress(function() {
+          tron.captureSkinColorAfterDelay(3000);
+        });
 
         // Check steering angle periodically
         window.setInterval(function() {
           $wheel.velocity("stop").velocity({rotateZ: - tron.getSteeringAngle() * 180 / Math.PI + "deg"}, 25);
-        }, 30)
-
+        }, 30);
       });
 
     </script>

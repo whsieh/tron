@@ -2,18 +2,25 @@
 
 module Coordinator {
 
-    var cameraVideo: HTMLVideoElement = null;
-    var leftCanvas: HTMLCanvasElement = null;
-    var rightCanvas: HTMLCanvasElement = null;
-    var centerCanvas: HTMLCanvasElement = null;
-    var setupCanvas: HTMLCanvasElement = null;
-    var camera: Util.Camera = null;
-    var cameraWidth: number = 250;
-    var cameraHeight: number = 190;
-    var gameRendererWidth: number = 800;
-    var gameRendererHeight: number = 600;
-
     export function create(cameraVideoId: String, setupCanvasId: String, leftCanvasId: String, centerCanvasId: String, rightCanvasId: String): any {
+
+        var cameraVideo: HTMLVideoElement = null;
+        var leftCanvas: HTMLCanvasElement = null;
+        var rightCanvas: HTMLCanvasElement = null;
+        var centerCanvas: HTMLCanvasElement = null;
+        var setupCanvas: HTMLCanvasElement = null;
+        var camera: Util.Camera = null;
+        var smallScreenWidth: number = 250;
+        var smallScreenHeight: number = 190;
+        var largeScreenWidth: number = 800;
+        var largeScreenHeight: number = 600;
+        var skinCaptureRegionLeft: number;
+        var skinCaptureRegionTop: number;
+        var skinCaptureRegionWidth: number;
+        var skinCaptureRegionHeight: number;
+        var didCaptureSkinColor: boolean = false;
+        var cameraOverlayFontSize: number = 16;
+        var cameraCountdownFontSize: number = 24;
 
         cameraVideo = <HTMLVideoElement> Util.findFirstElementFromId(cameraVideoId);
         if (cameraVideo == null)
@@ -37,43 +44,95 @@ module Coordinator {
 
         camera = new Util.Camera(cameraVideo, setupCanvas, function(e) {
             console.log("Error: Failed to initialize camera with error:" + e.name);
+            location.reload();
         });
 
-        var setCameraDimensions = function(width: number, height: number) {
-            cameraWidth = width;
-            cameraHeight = height;
+        var setSmallScreenDimensions = function(width: number, height: number) {
+            smallScreenWidth = width;
+            smallScreenHeight = height;
         }
 
-        var setGameRendererDimensions = function(width: number, height: number) {
-            gameRendererWidth = width;
-            gameRendererHeight = height;
+        var setLargeScreenDimensions = function(width: number, height: number) {
+            largeScreenWidth = width;
+            largeScreenHeight = height;
         }
 
-        var initializeSteeringAndGame = function() {
-            if (!camera.ready()) {
-                setTimeout(initializeSteeringAndGame, 1000);
-                return;
-            }
-            camera.cropResize(cameraWidth, cameraHeight);
-            camera.start();
+        var setSkinCaptureRegion = function(left: number, top: number, width: number, height: number): void {
+            skinCaptureRegionLeft = left;
+            skinCaptureRegionTop = top;
+            skinCaptureRegionWidth = width;
+            skinCaptureRegionHeight = height;
+            camera.setRenderCameraOverlay(function(context: CanvasRenderingContext2D) {
+                renderCameraOverlay(context);
+                context.save();
+                context.fillStyle = "#FF0000";
+                context.font = cameraOverlayFontSize + "px serif";
+                context.fillText("Press any key to begin capture.",
+                    skinCaptureRegionLeft,
+                    skinCaptureRegionTop + skinCaptureRegionHeight + cameraOverlayFontSize + 4);
+                context.restore();
+            });
+        }
 
-            console.log("Preparing to capture skin color...");
+        var renderCameraOverlay = function(context: CanvasRenderingContext2D) {
+            context.beginPath();
+            context.save();
+            context.strokeStyle = "#FF0000";
+            context.lineWidth = 3;
+            context.moveTo(skinCaptureRegionLeft - 2, skinCaptureRegionTop - 2);
+            context.lineTo(skinCaptureRegionLeft + skinCaptureRegionWidth + 2, skinCaptureRegionTop - 2);
+            context.lineTo(skinCaptureRegionLeft + skinCaptureRegionWidth + 2, skinCaptureRegionTop + skinCaptureRegionHeight + 2);
+            context.lineTo(skinCaptureRegionLeft - 2, skinCaptureRegionTop + skinCaptureRegionHeight + 2);
+            context.lineTo(skinCaptureRegionLeft - 2, skinCaptureRegionTop - 2);
+            context.stroke();
+            context.restore();
+        }
+
+        var captureSkinColorAfterDelay = function(captureDelay) {
+            var captureStartTime:number = new Date().getTime();
+            camera.setRenderCameraOverlay(function(context: CanvasRenderingContext2D) {
+                var currentTime = new Date().getTime();
+                var timeInMSSinceCaptureBegan = currentTime - captureStartTime;
+                if (timeInMSSinceCaptureBegan <= captureDelay) {
+                    renderCameraOverlay(context);
+                    context.save();
+                    context.fillStyle = "#FF0000";
+                    context.font = cameraCountdownFontSize + "px serif";
+                    context.fillText(String(Math.round((captureDelay - timeInMSSinceCaptureBegan) / 1000)),
+                        skinCaptureRegionLeft + skinCaptureRegionWidth,
+                        skinCaptureRegionTop + skinCaptureRegionHeight + cameraCountdownFontSize + 4);
+                    context.restore();
+                } else
+                    camera.setRenderCameraOverlay(null);
+            });
             setTimeout(function() {
-                var rgbData = new Util.RGBData(cameraWidth, cameraHeight);
+                var rgbData = new Util.RGBData(largeScreenWidth, largeScreenHeight);
                 rgbData.setFrame(camera.getFrame());
-                var skinColor = Setup.getAverageColor(rgbData, Math.round(cameraWidth / 3), Math.round(cameraHeight / 3), Math.round(cameraWidth / 3), Math.round(cameraHeight / 3));
+                var skinColor = Setup.getAverageColor(rgbData, skinCaptureRegionLeft, skinCaptureRegionTop, skinCaptureRegionWidth, skinCaptureRegionHeight);
+                didCaptureSkinColor = true;
 
-                centerCanvas.width = gameRendererWidth;
-                centerCanvas.height = gameRendererHeight;
                 $(setupCanvas).hide();
                 $(centerCanvas).show();
+                centerCanvas.width = largeScreenWidth;
+                centerCanvas.height = largeScreenHeight;
+                camera.cropResize(smallScreenWidth, smallScreenHeight);
                 camera.setDisplayCanvas(leftCanvas);
                 Steering.setDisplayCanvas(rightCanvas);
                 Steering.setup(camera, skinColor);
                 Steering.start(10);
                 Engine.initialize(centerCanvas);
                 Engine.start();
-            }, 1000);
+            }, captureDelay);
+        }
+
+        var initializeSteeringAndGame = function() {
+            if (!camera.ready())
+                setTimeout(initializeSteeringAndGame, 500);
+
+            else {
+                camera.cropResize(largeScreenWidth, largeScreenHeight);
+                camera.start();
+            }
         }
 
         var getSteeringAngle = function() {
@@ -81,10 +140,12 @@ module Coordinator {
         }
 
         return {
-            setCameraDimensions: setCameraDimensions,
-            setGameRendererDimensions: setGameRendererDimensions,
+            setSmallScreenDimensions: setSmallScreenDimensions,
+            setLargeScreenDimensions: setLargeScreenDimensions,
+            setSkinCaptureRegion: setSkinCaptureRegion,
             initialize: initializeSteeringAndGame,
-            getSteeringAngle: getSteeringAngle
+            getSteeringAngle: getSteeringAngle,
+            captureSkinColorAfterDelay: captureSkinColorAfterDelay
         }
     }
 }
