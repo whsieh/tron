@@ -232,11 +232,13 @@ module Graphics {
         }
 
         public goalReached(nextLevel:()=>void): void {
-            nextLevel()
+            nextLevel();
+            intializeScene();
         }
 
         public gameOver(restartGame:()=>void): void {
-            restartGame()
+            restartGame();
+            intializeScene();
         }
 
         private setupPlayer() : void {
