@@ -22,7 +22,7 @@ module Engine {
     var MAX_OBSTACLES: number = 250;
 
     /* Global variables */
-    var gameState: GameState;
+    var gameState: GameState = new GameState();
     var graphicEngine: Graphics.Engine = null;
     var collisionObjects: CollisionObject[][];
     var numObstacles: number;
@@ -103,7 +103,7 @@ module Engine {
     /* Function to initialize a Tron game. */
     export function initialize(gameCanvas: HTMLCanvasElement) {
         numObstacles = 25;
-        gameState = initializeGameState();
+        initializeGameState();
         if (graphicEngine == null)
             graphicEngine = new Graphics.Engine(gameState, gameCanvas);
         graphicEngine.render();
@@ -111,22 +111,20 @@ module Engine {
 
     /* Callback function for updating animation on screen. */
     export function step(timestamp: number) {
-        if (!gameState.isGameOver) {
+        if (!gameState.paused) {
             var dt: number;
             if (start == null) start = timestamp;
             dt = timestamp - start;
             start = timestamp;
 
             var player: GamePlayer = <GamePlayer> gameState.player;
+            player.curPos = player.nextPos;
 
             //Get player input for player and update its normalized theta
             player.normalizedTheta = Steering.theta();
 
-            var line: Point[];
-            var nextPos: Point;
-
             updateDir(player, dt);
-            nextPos = move(player, dt);
+            player.nextPos = move(player, dt);
 
             var hitbox = player.getHitBox();
             for (var i = 0; i < hitbox.length; i++) {
@@ -140,7 +138,6 @@ module Engine {
                     obj.handleCollision(player);
             }
 
-            player.curPos = nextPos;
 
         }
         graphicEngine.render();
@@ -152,21 +149,25 @@ module Engine {
         numObstacles += 25;
         if (numObstacles > MAX_OBSTACLES)
             numObstacles = MAX_OBSTACLES;
-        gameState = initializeGameState();
+        initializeGameState();
     }
 
     function goalReached() {
+        gameState.paused = true;
         graphicEngine.goalReached(nextLevel);
     }
 
     /* Function for restarting the game after a Game over. */
     function restartGame() {
+        console.log("Restarting game...");
+        console.log(gameState);
         initialize(null);
+        console.log(gameState);
     }
 
     /* Function for handling a game over event. */
     function gameOver() {
-        gameState.isGameOver = true;
+        gameState.paused = true;
         graphicEngine.gameOver(restartGame);
     }
 
@@ -180,22 +181,22 @@ module Engine {
         return {pos: newPoint(50, 50), dir: new Vector3(3, 5, 0)};
     }
 
-    /* Function for initializing and returning a new GameState. */
-    function initializeGameState(): GameState {
-        var gs: GameState = new GameState();
+    /* Function for initializing the new GameState. */
+    function initializeGameState(){
+        gameState.paused = true;
         var tmp;
         tmp = randomStart();
-        gs.player = new GamePlayer(tmp["pos"], 0, tmp["dir"]);
-        gs.isGameOver = false;
-        gs.score = 0;
-        gs.obstacles = [];
-        collisionObjects = initializeCollisionObjects(gs);
-        return gs;
+        gameState.player = new GamePlayer(tmp["pos"], 0, tmp["dir"]);
+        gameState.score = 0;
+        gameState.obstacles = [];
+        gameState.goal = null;
+        initializeCollisionObjects();
+        gameState.paused = false;
     }
 
-    /* Function for initialzing and returning a 2D array of CollisionObject. */
-    function initializeCollisionObjects(gs: GameState): CollisionObject[][] {
-        var player = gs.player;
+    /* Function for initialzing the CollisionObject's. */
+    function initializeCollisionObjects() {
+        var player = gameState.player;
         var co: CollisionObject[][] = new Array<CollisionObject[]>(GRID_HEIGHT);
         for (var i = 0; i < co.length; i++) {
             co[i] = new Array<CollisionObject>(GRID_WIDTH);
@@ -211,15 +212,15 @@ module Engine {
             occupied.push(p);
             var obstacle = new Obstacle(collisionToMap(p));
             co[p.x][p.y] = obstacle;
-            gs.obstacles.push(obstacle);
+            gameState.obstacles.push(obstacle);
         }
 
         //Create goal
         var p = getRandomPoint(occupied);
         var goal = new Goal(collisionToMap(p));
         co[p.x][p.y] = goal;
-        gs.goal = goal;
-        return co;
+        gameState.goal = goal;
+        collisionObjects = co;
     }
 
     /* Return a ranomd Point with x,y-values between WIDTH and HEIGHT, and not in OCCUPIED. */
