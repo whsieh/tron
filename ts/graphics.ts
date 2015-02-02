@@ -33,8 +33,6 @@ module Graphics {
         constructor(state: GameState, gameCanvas: HTMLCanvasElement) {
             this.state = state;
             this.initializeScene();
-            console.log([gameCanvas.width, gameCanvas.height]);
-            console.log(gameCanvas);
             this.initializeCamera(gameCanvas.width / gameCanvas.height);
             this.initializeRenderer(gameCanvas);
         }
@@ -73,13 +71,13 @@ module Graphics {
 
             var geometry = new THREE.BoxGeometry(obstacleWidth, obstacleDepth, OBSTACLE_HEIGHT);
 
-            var wireframeMaterial = new THREE.MeshBasicMaterial({ 
+            var wireframeMaterial = new THREE.MeshBasicMaterial({
                 color: 0xFF0000,
                 shading: THREE.FlatShading,
                 wireframe: true,
                 wireframeLinewidth: 2
             });
-            var hiddenMaterial = new THREE.MeshBasicMaterial({ 
+            var hiddenMaterial = new THREE.MeshBasicMaterial({
                 color: 0x000000,
                 shading: THREE.FlatShading,
             });
@@ -91,7 +89,7 @@ module Graphics {
                 obstacle.position.x = obstaclePos.x + obstacleWidth / 2;
                 obstacle.position.y = obstaclePos.y + obstacleWidth / 2;
                 obstacle.position.z = OBSTACLE_HEIGHT / 2;
-                this.scene.add(obstacle);                
+                this.scene.add(obstacle);
 
                 var hiddenObstacle = new THREE.Mesh(geometry, hiddenMaterial)
                 hiddenObstacle.position.x = obstaclePos.x + obstacleWidth / 2;
