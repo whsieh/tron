@@ -106,6 +106,7 @@ module Engine {
         gameState = initializeGameState();
         if (graphicEngine == null)
             graphicEngine = new Graphics.Engine(gameState, gameCanvas);
+        graphicEngine.render();
     }
 
     /* Callback function for updating animation on screen. */

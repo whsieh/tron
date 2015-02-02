@@ -8,25 +8,6 @@ module Graphics {
         return new THREE.Vector3(x, y, z)
     }
 
-    function generateVertexColors ( geometry ) {
-        // Generates random vertex colors, stolen from THREE.js documentation
-        for (var i = 0, il = geometry.faces.length; i < il; i++) {
-            for (var _ = 0; _ < 3; _++) {
-                geometry.faces[i].vertexColors.push(new THREE.Color().setHSL(
-                    i / il * Math.random(),
-                    0.5,
-                    0.5
-                ));
-            }
-
-            geometry.faces[i].color = new THREE.Color().setHSL(
-                i / il * Math.random(),
-                0.5,
-                0.5
-            );
-        }
-    }
-
     // Constants
     var PLAYER_COLOR: number = 0xFF00FF;
     var CAMERA_HEIGHT: number = 25;
@@ -34,7 +15,7 @@ module Graphics {
     var HOVER_HEIGHT: number = 4;
     var PLAYER_HEIGHT: number = 6;
     var OBSTACLE_HEIGHT: number = 25;
-    var GOAL_HEIGHT: number = 25;
+    var GOAL_HEIGHT: number = 75;
 
     export class Engine {
         // Engine state
@@ -167,7 +148,6 @@ module Graphics {
             geometry.faces.push(new THREE.Face3(2, 3, 4));
             geometry.faces.push(new THREE.Face3(3, 0, 4));
 
-            // generateVertexColors(geometry);
             var wireframeMaterial = new THREE.MeshBasicMaterial({ 
                 color: 0x00FF00,
                 shading: THREE.FlatShading,
