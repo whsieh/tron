@@ -8,6 +8,25 @@ module Graphics {
         return new THREE.Vector3(x, y, z)
     }
 
+    function generateVertexColors ( geometry ) {
+        // Generates random vertex colors, stolen from THREE.js documentation
+        for (var i = 0, il = geometry.faces.length; i < il; i++) {
+            for (var _ = 0; _ < 3; _++) {
+                geometry.faces[i].vertexColors.push(new THREE.Color().setHSL(
+                    i / il * Math.random(),
+                    0.5,
+                    0.5
+                ));
+            }
+
+            geometry.faces[i].color = new THREE.Color().setHSL(
+                i / il * Math.random(),
+                0.5,
+                0.5
+            );
+        }
+    }
+
     // Constants
     var PLAYER_COLOR: number = 0xFF00FF;
     var CAMERA_HEIGHT: number = 25;
@@ -15,6 +34,7 @@ module Graphics {
     var HOVER_HEIGHT: number = 4;
     var PLAYER_HEIGHT: number = 6;
     var OBSTACLE_HEIGHT: number = 25;
+    var GOAL_HEIGHT: number = 25;
 
     export class Engine {
         // Engine state
@@ -26,6 +46,8 @@ module Graphics {
         // Render state
         private player: any;
         private hiddenPlayer: any;
+        private goal: any;
+        private hiddenGoal: any;
 
         constructor(state: GameState, gameCanvas: HTMLCanvasElement) {
             this.state = state;
@@ -99,7 +121,69 @@ module Graphics {
         }
 
         private initializeGoal(): void {
+            var goalWidth = Data.WIDTH / Data.GRID_WIDTH;
+            var goalDepth = Data.HEIGHT / Data.GRID_HEIGHT;
 
+            // var goalX = this.state.goal.pos.x;
+            // var goalY = this.state.goal.pos.y;
+            var goalX = 800;
+            var goalY = 800;
+
+            this.initializeGoalSquare(goalWidth, goalDepth, goalX, goalY);
+            this.initializeGoalObject(goalWidth, goalDepth, goalX, goalY);
+        }
+
+        private initializeGoalSquare(goalWidth, goalDepth, goalX, goalY): void {
+            // Colored Square
+            var geometry = new THREE.Geometry();
+            geometry.vertices.push(v3(goalX, goalY, 0));
+            geometry.vertices.push(v3(goalX + goalWidth, goalY, 0));
+            geometry.vertices.push(v3(goalX + goalWidth, goalY + goalDepth, 0));
+            geometry.vertices.push(v3(goalX, goalY + goalDepth, 0));
+            geometry.faces.push(new THREE.Face3(0, 1, 2));
+            geometry.faces.push(new THREE.Face3(0, 2, 3));
+            var material = new THREE.MeshBasicMaterial({
+                color: 0x0000FF,
+                shading: THREE.FlatShading,
+            });
+            material.opacity = 0.5;
+            material.transparent = true;
+            var goalSquare = new THREE.Mesh(geometry, material);
+            this.scene.add(goalSquare);
+        }
+
+        private initializeGoalObject(goalWidth, goalDepth, goalX, goalY): void {
+            var geometry = new THREE.Geometry();
+            geometry.vertices.push(v3(goalX, goalY, 0));
+            geometry.vertices.push(v3(goalX + goalWidth, goalY, 0));
+            geometry.vertices.push(v3(goalX + goalWidth, goalY + goalDepth, 0));
+            geometry.vertices.push(v3(goalX, goalY + goalDepth, 0));
+            geometry.vertices.push(v3(goalX  + goalWidth / 2, goalY + goalDepth / 2, GOAL_HEIGHT));
+
+            geometry.faces.push(new THREE.Face3(0, 1, 2));
+            geometry.faces.push(new THREE.Face3(0, 2, 3));
+            geometry.faces.push(new THREE.Face3(0, 1, 4));
+            geometry.faces.push(new THREE.Face3(1, 2, 4));
+            geometry.faces.push(new THREE.Face3(2, 3, 4));
+            geometry.faces.push(new THREE.Face3(3, 0, 4));
+
+            // generateVertexColors(geometry);
+            var wireframeMaterial = new THREE.MeshBasicMaterial({ 
+                color: 0x00FF00,
+                shading: THREE.FlatShading,
+                wireframe: true,
+                wireframeLinewidth: 4
+            });
+            var hiddenMaterial = new THREE.MeshBasicMaterial({ 
+                color: 0x007700,
+                shading: THREE.FlatShading,
+            });
+
+            this.goal = new THREE.Mesh(geometry, wireframeMaterial);
+            this.scene.add(this.goal)
+
+            this.hiddenGoal = new THREE.Mesh(geometry, hiddenMaterial);
+            this.scene.add(this.hiddenGoal)
         }
 
         private initializePlayer(): void {
@@ -130,7 +214,7 @@ module Graphics {
                 wireframeLinewidth: 3
             });
 
-            var hiddenObjectMaterial = new THREE.MeshBasicMaterial({
+            var hiddenMaterial = new THREE.MeshBasicMaterial({
                 color: 0x000000,
                 shading: THREE.FlatShading
             });
@@ -140,14 +224,14 @@ module Graphics {
             this.player.up.set(0, 0, 1);
             this.scene.add(this.player);
 
-            this.hiddenPlayer = new THREE.Mesh(geometry.clone(), hiddenObjectMaterial);
+            this.hiddenPlayer = new THREE.Mesh(geometry.clone(), hiddenMaterial);
             this.hiddenPlayer.position.z = HOVER_HEIGHT + PLAYER_HEIGHT;
             this.hiddenPlayer.up.set(0, 0, 1);
             this.scene.add(this.hiddenPlayer);
         }
 
         private initializeCamera(aspectRatio: number): void {
-            this.camera = new THREE.PerspectiveCamera(CAMERA_FOV, aspectRatio, 0.1, 1000);
+            this.camera = new THREE.PerspectiveCamera(CAMERA_FOV, aspectRatio, 0.1, 10000);
             this.camera.position.z = CAMERA_HEIGHT;
             this.camera.up.set(0, 0, 1);
         }
