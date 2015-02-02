@@ -103,10 +103,10 @@ module Graphics {
             var goalWidth = Data.WIDTH / Data.GRID_WIDTH;
             var goalDepth = Data.HEIGHT / Data.GRID_HEIGHT;
 
-            // var goalX = this.state.goal.pos.x;
-            // var goalY = this.state.goal.pos.y;
-            var goalX = 800;
-            var goalY = 800;
+            var goalX = this.state.goal.pos.x;
+            var goalY = this.state.goal.pos.y;
+            //var goalX = 800;
+            //var goalY = 800;
 
             this.initializeGoalSquare(goalWidth, goalDepth, goalX, goalY);
             this.initializeGoalObject(goalWidth, goalDepth, goalX, goalY);

@@ -1,5 +1,7 @@
 /// <reference path="./references.ts" />
 module Engine {
+    declare var Queue;
+
     /* Rename imports for easy reference */
     import Vector3 = THREE.Vector3;
     import Point = Data.Point;
@@ -156,7 +158,10 @@ module Engine {
         numObstacles += 25;
         if (numObstacles > MAX_OBSTACLES)
             numObstacles = MAX_OBSTACLES;
+        //Perserve the position, direction and other info about the player.
+        var player: GamePlayer = <GamePlayer> gameState.player;
         initializeGameState();
+        gameState.player = player;
     }
 
     function goalReached() {
@@ -166,10 +171,7 @@ module Engine {
 
     /* Function for restarting the game after a Game over. */
     function restartGame() {
-        console.log("Restarting game...");
-        console.log(gameState);
         initialize(null);
-        console.log(gameState);
     }
 
     /* Function for handling a game over event. */
@@ -202,14 +204,16 @@ module Engine {
     }
 
     /* Function for initialzing the CollisionObject's. */
-    function initializeCollisionObjects() {
+    function initializeCollisionObjects(depth: number = 5): boolean{
+        if (depth <= 0)
+            return false;
         var player = gameState.player;
-        var co: CollisionObject[][] = new Array<CollisionObject[]>(GRID_HEIGHT);
-        for (var i = 0; i < co.length; i++) {
-            co[i] = new Array<CollisionObject>(GRID_WIDTH);
+        collisionObjects = new Array<CollisionObject[]>(GRID_HEIGHT);
+        for (var i = 0; i < collisionObjects.length; i++) {
+            collisionObjects[i] = new Array<CollisionObject>(GRID_WIDTH);
             //Initialize with nulls
-            for (var j = 0; j < co[i].length; j++)
-                co[i][j] = null;
+            for (var j = 0; j < collisionObjects[i].length; j++)
+                collisionObjects[i][j] = null;
         }
         var occupied: Point[] = getSurroundingPoints(mapToCollision(player.curPos));
 
@@ -218,16 +222,85 @@ module Engine {
             var p = getRandomPoint(occupied);
             occupied.push(p);
             var obstacle = new Obstacle(collisionToMap(p));
-            co[p.x][p.y] = obstacle;
+            collisionObjects[p.x][p.y] = obstacle;
             gameState.obstacles.push(obstacle);
         }
 
         //Create goal
-        var p = getRandomPoint(occupied);
-        var goal = new Goal(collisionToMap(p));
-        co[p.x][p.y] = goal;
-        gameState.goal = goal;
-        collisionObjects = co;
+        //var gp = createGoal();
+        var gp = getRandomPoint(occupied);
+        if (gp != null) {
+            var goal = new Goal(collisionToMap(gp));
+            collisionObjects[gp.x][gp.y] = goal;
+            gameState.goal = goal;
+            return true;
+        } else {
+            console.log("Cannot find suitable goal, regenerating map...");
+            return initializeCollisionObjects(depth-1);
+        }
+    }
+
+/*    function createGoal(low: number = 20): Point {
+        var goalCandidates: Point[] = [];
+        var  visited = []
+        for (var i = 0; i < GRID_HEIGHT; i++) {
+            var subArray = []
+            for (var j = 0; j < GRID_WIDTH; j++) {
+                subArray.push(false);
+            }
+            visited.push(subArray)
+        }
+        var queue = <any> new Queue();
+
+        var start = mapToCollision(gameState.player.curPos);
+        queue.enqueue({x: start.x, y: start.y, length: 0});
+        visited[start.x][start.y] = true;
+
+        var x: number;
+        var y: number;
+        var tmp = [];
+        while(!queue.isEmpty()) {
+            var current = queue.dequeue();
+            visited[current.x][current.y] = true;
+            //console.log("Path length = " + current.length);
+            if (current.length >= tmp.length)
+                tmp.push(1);
+            else
+                tmp[current.length] += 1;
+            if (current.length >= low) {
+                //console.log("Added to goal candidates:");
+                //console.log(current);
+                goalCandidates.push(newPoint(current.x, current.y));
+            }
+            var neighbors: Point[] = getNeighbors(newPoint(current.x, current.y));
+            //console.log(visited);
+            for (var i = 0; i < neighbors.length; i++) {
+                var n: Point = neighbors[i];
+                if (!visited[n.x][n.y] && collisionObjects[i][j] == null) {
+                    queue.enqueue({x: n.x, y: n.y, length: current.length + 1});
+                }
+            }
+            //console.log(queue);
+        }
+
+        for (var i = 0; i < tmp.length; i++)
+            console.log("Length " + i + " = " + tmp[i]);
+
+        if (goalCandidates.length == 0)
+            return null;
+        else 
+            return goalCandidates[Math.floor(Math.random() * goalCandidates.length)];
+    }*/
+
+    function getNeighbors(p: Point, width: number = GRID_WIDTH, height: number = GRID_HEIGHT): Point[] {
+        var neighbors = [];
+        for (var i = -1; i < 2; i++) {
+            for (var j = -1; j < 2; j++) {
+                if ((0 <= p.x + i && p.x + i < width) && (0 <= p.y + j && p.y + j < height))
+                    neighbors.push(newPoint(p.x + i, p.y + j));
+            }
+        }
+        return neighbors;
     }
 
     /* Return a ranomd Point with x,y-values between WIDTH and HEIGHT, and not in OCCUPIED. */
