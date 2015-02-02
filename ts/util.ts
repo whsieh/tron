@@ -132,6 +132,11 @@ module Util {
             this.context = canvas.getContext("2d");
         }
 
+        setDisplayCanvas(canvas: HTMLCanvasElement): void {
+            this.canvas = canvas;
+            this.context = canvas.getContext("2d");
+        }
+
         ready(): boolean {
             return this.isReady;
         }

@@ -2,38 +2,51 @@
 
 module Coordinator {
 
-    export function create(cameraVideoId: String, cameraCanvasId: String, debugCanvasId: String, gameCanvasId: String): any {
-        var cameraVideo: HTMLVideoElement = null;
-        var cameraCanvas: HTMLCanvasElement = null;
-        var debugCanvas: HTMLCanvasElement = null;
-        var gameCanvas: HTMLCanvasElement = null;
-        var camera: Util.Camera = null;
-        var cameraWidth: number = 250;
-        var cameraHeight: number = 190;
+    var cameraVideo: HTMLVideoElement = null;
+    var leftCanvas: HTMLCanvasElement = null;
+    var rightCanvas: HTMLCanvasElement = null;
+    var centerCanvas: HTMLCanvasElement = null;
+    var setupCanvas: HTMLCanvasElement = null;
+    var camera: Util.Camera = null;
+    var cameraWidth: number = 250;
+    var cameraHeight: number = 190;
+    var gameRendererWidth: number = 800;
+    var gameRendererHeight: number = 600;
+
+    export function create(cameraVideoId: String, setupCanvasId: String, leftCanvasId: String, centerCanvasId: String, rightCanvasId: String): any {
 
         cameraVideo = <HTMLVideoElement> Util.findFirstElementFromId(cameraVideoId);
         if (cameraVideo == null)
-            return { error: "Setup failed: could not find camera's video element \"" + cameraVideoId + "\"" }
+            return { error: "Setup failed: could not find the camera's video element \"" + cameraVideoId + "\"" }
 
-        cameraCanvas = <HTMLCanvasElement> Util.findFirstElementFromId(cameraCanvasId);
-        if (cameraCanvas == null)
-            return { error: "Setup failed: could not find camera's canvas element \"" + cameraCanvasId + "\"" }
+        setupCanvas = <HTMLCanvasElement> Util.findFirstElementFromId(setupCanvasId);
+        if (setupCanvas == null)
+            return { error: "Setup failed: could not find the setup canvas \"" + setupCanvasId + "\"" }
 
-        debugCanvas = <HTMLCanvasElement> Util.findFirstElementFromId(debugCanvasId);
-        if (debugCanvas == null)
-            return { error: "Setup failed: could not find debug canvas \"" + debugCanvasId + "\"" }
+        leftCanvas = <HTMLCanvasElement> Util.findFirstElementFromId(leftCanvasId);
+        if (leftCanvas == null)
+            return { error: "Setup failed: could not find the camera canvas \"" + leftCanvasId + "\"" }
 
-        gameCanvas = <HTMLCanvasElement> Util.findFirstElementFromId(gameCanvasId);
-        if (gameCanvas == null)
-            return { error: "Setup failed: could not find game canvas \"" + gameCanvasId + "\"" }
+        rightCanvas = <HTMLCanvasElement> Util.findFirstElementFromId(rightCanvasId);
+        if (rightCanvas == null)
+            return { error: "Setup failed: could not find the debug canvas \"" + rightCanvasId + "\"" }
 
-        camera = new Util.Camera(cameraVideo, cameraCanvas, function(e) {
+        centerCanvas = <HTMLCanvasElement> Util.findFirstElementFromId(centerCanvasId);
+        if (centerCanvas == null)
+            return { error: "Setup failed: could not find the game canvas \"" + centerCanvasId + "\"" }
+
+        camera = new Util.Camera(cameraVideo, setupCanvas, function(e) {
             console.log("Error: Failed to initialize camera with error:" + e.name);
         });
-        
+
         var setCameraDimensions = function(width: number, height: number) {
             cameraWidth = width;
             cameraHeight = height;
+        }
+
+        var setGameRendererDimensions = function(width: number, height: number) {
+            gameRendererWidth = width;
+            gameRendererHeight = height;
         }
 
         var initializeSteeringAndGame = function() {
@@ -50,11 +63,15 @@ module Coordinator {
                 rgbData.setFrame(camera.getFrame());
                 var skinColor = Setup.getAverageColor(rgbData, Math.round(cameraWidth / 3), Math.round(cameraHeight / 3), Math.round(cameraWidth / 3), Math.round(cameraHeight / 3));
 
-                console.log("    Skin color: [r=" + skinColor.r + ", g=" + skinColor.g + ", b=" + skinColor.b + "]");
-                Steering.setDisplayCanvas(debugCanvas);
+                centerCanvas.width = gameRendererWidth;
+                centerCanvas.height = gameRendererHeight;
+                $(setupCanvas).hide();
+                $(centerCanvas).show();
+                camera.setDisplayCanvas(leftCanvas);
+                Steering.setDisplayCanvas(rightCanvas);
                 Steering.setup(camera, skinColor);
                 Steering.start(10);
-                Engine.initialize(gameCanvas);
+                Engine.initialize(centerCanvas);
                 Engine.step(0);
             }, 1000);
         }
@@ -65,6 +82,7 @@ module Coordinator {
 
         return {
             setCameraDimensions: setCameraDimensions,
+            setGameRendererDimensions: setGameRendererDimensions,
             initialize: initializeSteeringAndGame,
             getSteeringAngle: getSteeringAngle
         }

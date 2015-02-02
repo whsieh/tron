@@ -30,8 +30,10 @@ module Graphics {
         constructor(state: GameState, gameCanvas: HTMLCanvasElement) {
             this.state = state;
             this.initializeScene();
+            console.log([gameCanvas.width, gameCanvas.height]);
+            console.log(gameCanvas);
             this.initializeCamera(gameCanvas.width / gameCanvas.height);
-            this.initializeRenderer(gameCanvas);        
+            this.initializeRenderer(gameCanvas);
         }
 
         private initializeScene(): void {
@@ -153,9 +155,10 @@ module Graphics {
         private initializeRenderer(canvas: HTMLCanvasElement): void {
             this.renderer = new THREE.WebGLRenderer({
                 canvas: canvas,
-                antialias: true, 
+                antialias: true,
                 precision: "highp"
             });
+            console.log("Initialized renderer.");
             this.renderer.setClearColor("black");
         }
 
@@ -195,13 +198,13 @@ module Graphics {
 
             // Point player in the right direction
             this.player.lookAt(v3(
-                pos.x + dir.x * 50, 
+                pos.x + dir.x * 50,
                 pos.y + dir.y * 50,
                 PLAYER_HEIGHT + HOVER_HEIGHT - 8
                 )
             );
             this.hiddenPlayer.lookAt(v3(
-                pos.x + dir.x * 50, 
+                pos.x + dir.x * 50,
                 pos.y + dir.y * 50,
                 PLAYER_HEIGHT + HOVER_HEIGHT - 8
                 )
