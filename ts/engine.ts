@@ -26,7 +26,7 @@ module Engine {
     var graphicEngine: Graphics.Engine = null;
     var collisionObjects: CollisionObject[][];
     var numObstacles: number;
-    var start: number = null;
+    var startTimestamp: number = null;
 
 
     /* Interfaces and classes */
@@ -102,6 +102,7 @@ module Engine {
 
     /* Function to initialize a Tron game. */
     export function initialize(gameCanvas: HTMLCanvasElement) {
+        startTimestamp = null;
         numObstacles = 25;
         initializeGameState();
         if (graphicEngine == null)
@@ -109,13 +110,19 @@ module Engine {
         graphicEngine.render();
     }
 
+    export function start() {
+        setTimeout(function() {
+            requestAnimationFrame(step);
+        }, 2000);
+    }
+
     /* Callback function for updating animation on screen. */
     export function step(timestamp: number) {
         if (!gameState.paused) {
             var dt: number;
-            if (start == null) start = timestamp;
-            dt = timestamp - start;
-            start = timestamp;
+            if (startTimestamp == null) startTimestamp = timestamp;
+            dt = timestamp - startTimestamp;
+            startTimestamp = timestamp;
 
             var player: GamePlayer = <GamePlayer> gameState.player;
             player.curPos = player.nextPos;

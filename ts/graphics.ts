@@ -233,12 +233,12 @@ module Graphics {
 
         public goalReached(nextLevel:()=>void): void {
             nextLevel();
-            intializeScene();
+            this.initializeScene();
         }
 
         public gameOver(restartGame:()=>void): void {
             restartGame();
-            intializeScene();
+            this.initializeScene();
         }
 
         private setupPlayer() : void {

@@ -72,7 +72,7 @@ module Coordinator {
                 Steering.setup(camera, skinColor);
                 Steering.start(10);
                 Engine.initialize(centerCanvas);
-                Engine.step(0);
+                Engine.start();
             }, 1000);
         }
 

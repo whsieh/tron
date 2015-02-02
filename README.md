@@ -36,8 +36,7 @@ Data:
 Engine:
 
     initialize(gameCanvas: HTMLCanvasElement);
-    step(timestamp: number);
-    restartGame();
+    start();
 
 Graphics:
 
