@@ -21,6 +21,7 @@ module Coordinator {
         var didCaptureSkinColor: boolean = false;
         var cameraOverlayFontSize: number = 16;
         var cameraCountdownFontSize: number = 24;
+        var cameraPermissionReloadHash: string = "#camera_permission_denied";
 
         cameraVideo = <HTMLVideoElement> Util.findFirstElementFromId(cameraVideoId);
         if (cameraVideo == null)
@@ -44,7 +45,10 @@ module Coordinator {
 
         camera = new Util.Camera(cameraVideo, setupCanvas, function(e) {
             console.log("Error: Failed to initialize camera with error:" + e.name);
-            location.reload();
+            if (location.href.match(cameraPermissionReloadHash) == null) {
+                location.href += cameraPermissionReloadHash;
+                location.reload()
+            }
         });
 
         var setSmallScreenDimensions = function(width: number, height: number) {
