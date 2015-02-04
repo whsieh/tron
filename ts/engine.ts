@@ -24,7 +24,7 @@ module Engine {
     var MAX_STATIC_OBSTACLES: number = 45;
     var MAX_FLOATING_OBSTACLES: number = 85;
 
-    var SPEED_SCALE_FACTOR_PER_LEVEL: number = 1.25;
+    var SPEED_SCALE_FACTOR_PER_LEVEL: number = 1.15;
     var MAX_THETA_SCALE_FACTOR_PER_LEVEL: number = 1.1;
     var SPEED_LIMIT: number = 3 / TIMESTEP;
     var MAX_THETA_LIMIT: number = Util.degreeToRadian(10)
