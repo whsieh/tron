@@ -149,6 +149,6 @@ module Steering {
     }
 
     export function theta(): number {
-        return currentRawTheta;
+        return 2.0 * currentRawTheta / Math.PI;
     }
 }

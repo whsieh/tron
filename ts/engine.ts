@@ -19,7 +19,7 @@ module Engine {
     var TIMESTEP: number = 30;                  //Each logical time step is 30 milliseconds
     var SPEED: number = 1.6 / TIMESTEP;         //The speed of all player in map unit per millisecond.
     var DELTA_THETA: number = Util.degreeToRadian(0.5) / TIMESTEP;   //Turning speed in radian per millisecond.
-    var MAX_THETA = Util.degreeToRadian(4);                          //The maximum radian a player can turn.
+    var MAX_THETA: number = Util.degreeToRadian(3);                          //The maximum radian a player can turn.
     var Z_AXIS: Vector3 = new Vector3(0, 0, 1);
     var MAX_OBSTACLES: number = 250;
     var SPEED_SCALE_FACTOR_PER_LEVEL: number = 1.25;
@@ -361,10 +361,10 @@ module Engine {
         return {x: pos.x + distance * dir.x, y: pos.y + distance * dir.y};
     }
 
-    var tolerance: number = DELTA_THETA / 2;
+    var tolerance: number = Util.degreeToRadian(0.5) / TIMESTEP;
     /* Function for updating the direction a PLAYER is facing in DT milliseconds. */
     function updateDir(player: Player, dt: number): void {
-        var intendedTurn: number = player.normalizedTheta * MAX_THETA;
+        var intendedTurn: number = MAX_THETA * Math.tan(player.normalizedTheta);
         var delta: number = intendedTurn - player.curTheta;
         if (Math.abs(delta) > tolerance) {
             var direction: number = (delta >= 0)? 1 : -1;
