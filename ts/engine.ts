@@ -21,13 +21,13 @@ module Engine {
     var DELTA_THETA: number = Util.degreeToRadian(0.5) / TIMESTEP;      //Turning speed in radian per millisecond.
     var MAX_THETA: number = Util.degreeToRadian(3);                     //The maximum radian a player can turn.
     var Z_AXIS: Vector3 = new Vector3(0, 0, 1);
-    var MAX_STATIC_OBSTACLES: number = 40;
-    var MAX_FLOATING_OBSTACLES: number = 75;
+    var MAX_STATIC_OBSTACLES: number = 45;
+    var MAX_FLOATING_OBSTACLES: number = 85;
 
     var SPEED_SCALE_FACTOR_PER_LEVEL: number = 1.25;
     var MAX_THETA_SCALE_FACTOR_PER_LEVEL: number = 1.1;
-    var SPEED_LIMIT: number = 5 / TIMESTEP;
-    var MAX_THETA_LIMIT: number = Util.degreeToRadian(8)
+    var SPEED_LIMIT: number = 4 / TIMESTEP;
+    var MAX_THETA_LIMIT: number = Util.degreeToRadian(10)
 
     var FLOATING_OBSTACLE_SPEED: number = 1.2 / TIMESTEP;
     var FLOATING_OBSTACLE_MAX_HEIGHT: number = 100;
@@ -168,7 +168,7 @@ module Engine {
             var hitbox = player.getHitBox();
             for (var i = 0; i < hitbox.length; i++) {
                 if (!isInBound(hitbox[i]))
-                    updateScore(gameState.score - (dt / 10000));
+                    updateScore(gameState.score - (dt / 500));
 
                 var p = mapToCollision(hitbox[i]);
                 if (!isInBound(p, GRID_WIDTH, GRID_HEIGHT, 0))
@@ -198,7 +198,6 @@ module Engine {
     function nextLevel() {
         updateScore(gameState.score + 100);
         updateLevel(gameState.level + 1);
-        gameState.level++;
         numStaticObstacles += 10;
         numFloatingObstacles += 10;
         SPEED *= SPEED_SCALE_FACTOR_PER_LEVEL;
