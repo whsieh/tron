@@ -21,13 +21,16 @@ module Engine {
     var DELTA_THETA: number = Util.degreeToRadian(0.5) / TIMESTEP;      //Turning speed in radian per millisecond.
     var MAX_THETA: number = Util.degreeToRadian(3);                     //The maximum radian a player can turn.
     var Z_AXIS: Vector3 = new Vector3(0, 0, 1);
-    var MAX_STATIC_OBSTACLES: number = 70;
-    var MAX_FLOATING_OBSTACLES: number = 20;
+    var MAX_STATIC_OBSTACLES: number = 50;
+    var MAX_FLOATING_OBSTACLES: number = 50;
+
     var SPEED_SCALE_FACTOR_PER_LEVEL: number = 1.25;
     var MAX_THETA_SCALE_FACTOR_PER_LEVEL: number = 1.1;
+    var SPEED_LIMIT: number = 2.5 / TIMESTEP;
+    var MAX_THETA_LIMIT: number = Util.degreeToRadian(5)
 
-    var FLOATING_OBSTACLE_SPEED: number = 2 / TIMESTEP;
-    var FLOATING_OBSTACLE_MAX_HEIGHT: number = 50;
+    var FLOATING_OBSTACLE_SPEED: number = 1.2 / TIMESTEP;
+    var FLOATING_OBSTACLE_MAX_HEIGHT: number = 100;
     var FLOATING_OBSTACLE_COLLISION_THRESHOLD: number = 12;
 
     /* Global variables */
@@ -118,8 +121,8 @@ module Engine {
     /* Function to initialize a Tron game. */
     export function initialize(gameCanvas: HTMLCanvasElement) {
         startTimestamp = null;
-        numStaticObstacles = 20;
-        numFloatingObstacles = 5;
+        numStaticObstacles = 10;
+        numFloatingObstacles = 10;
         initializeGameState();
         if (graphicEngine == null)
             graphicEngine = new Graphics.Engine(gameState, gameCanvas);
@@ -195,10 +198,15 @@ module Engine {
         updateScore(gameState.score + 100);
         updateLevel(gameState.level + 1);
         gameState.level++;
-        numStaticObstacles += 20;
-        numFloatingObstacles += 5;
+        numStaticObstacles += 10;
+        numFloatingObstacles += 10;
         SPEED *= SPEED_SCALE_FACTOR_PER_LEVEL;
         MAX_THETA *= MAX_THETA_SCALE_FACTOR_PER_LEVEL;
+
+        if (SPEED > SPEED_LIMIT)
+            SPEED = SPEED_LIMIT;
+        if (MAX_THETA > MAX_THETA_LIMIT)
+            MAX_THETA = MAX_THETA_LIMIT
 
         if (numStaticObstacles > MAX_STATIC_OBSTACLES)
             numStaticObstacles = MAX_STATIC_OBSTACLES;
@@ -255,6 +263,7 @@ module Engine {
     /* Function for initialzing the CollisionObject's. */
     function initializeCollisionObjects(depth: number = 5): boolean{
         var player = gameState.player;
+        gameState.obstacles = [];
         collisionObjects = new Array<CollisionObject[]>(GRID_HEIGHT);
         for (var i = 0; i < collisionObjects.length; i++) {
             collisionObjects[i] = new Array<CollisionObject>(GRID_WIDTH);

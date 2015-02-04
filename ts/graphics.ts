@@ -14,7 +14,7 @@ module Graphics {
     var CAMERA_FOV: number = 75;
     var HOVER_HEIGHT: number = 4;
     var PLAYER_HEIGHT: number = 6;
-    var OBSTACLE_HEIGHT: number = 25;
+    var OBSTACLE_HEIGHT: number = 18;
     var GOAL_HEIGHT: number = 75;
 
     export class Engine {
