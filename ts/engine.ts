@@ -22,6 +22,8 @@ module Engine {
     var MAX_THETA = Util.degreeToRadian(4);                          //The maximum radian a player can turn.
     var Z_AXIS: Vector3 = new Vector3(0, 0, 1);
     var MAX_OBSTACLES: number = 250;
+    var SPEED_SCALE_FACTOR_PER_LEVEL: number = 1.25;
+    var MAX_THETA_SCALE_FACTOR_PER_LEVEL: number = 1.1;
 
     /* Global variables */
     var gameState: GameState = new GameState();
@@ -29,7 +31,6 @@ module Engine {
     var collisionObjects: CollisionObject[][];
     var numObstacles: number;
     var startTimestamp: number = null;
-
 
     /* Interfaces and classes */
     class GamePlayer extends Player {
@@ -44,7 +45,7 @@ module Engine {
         getHitBox(): Point[] {
             var hitbox = [];
             hitbox.push(this.curPos);
-            
+
             var a = new Vector3();
             a.copy(this.dir);
             a.negate();
@@ -61,7 +62,7 @@ module Engine {
     }
 
     interface CollisionObject extends MapObject {
-        isCollided(player: GamePlayer): boolean;
+        canCollide(player: GamePlayer): boolean;
         handleCollision(player: GamePlayer);
     }
 
@@ -72,7 +73,7 @@ module Engine {
             this.pos = pos;
         }
 
-        isCollided(player: GamePlayer): boolean {
+        canCollide(player: GamePlayer): boolean {
             return true;
         }
 
@@ -88,12 +89,7 @@ module Engine {
             this.pos = pos;
         }
 
-        isCollided(player: GamePlayer): boolean {
-            /*var goalPos = mapToCollision(this.pos);
-            var playerPos = mapToCollision(player.curPos);
-            if (goalPos.x == playerPos.x && goalPos.y == playerPos.y)
-                return true;
-            return false;*/
+        canCollide(player: GamePlayer): boolean {
             return true;
         }
 
@@ -105,7 +101,7 @@ module Engine {
     /* Function to initialize a Tron game. */
     export function initialize(gameCanvas: HTMLCanvasElement) {
         startTimestamp = null;
-        numObstacles = 25;
+        numObstacles = 20;
         initializeGameState();
         if (graphicEngine == null)
             graphicEngine = new Graphics.Engine(gameState, gameCanvas);
@@ -143,7 +139,7 @@ module Engine {
                 if (!isInBound(p, GRID_WIDTH, GRID_HEIGHT, 0))
                     continue;
                 var obj: CollisionObject = collisionObjects[p.x][p.y];
-                if (obj != null && obj.isCollided(player))
+                if (obj != null && obj.canCollide(player))
                     obj.handleCollision(player);
             }
 
@@ -155,7 +151,11 @@ module Engine {
 
     function nextLevel() {
         gameState.score += 100;
+        gameState.level++;
         numObstacles += 25;
+        SPEED *= SPEED_SCALE_FACTOR_PER_LEVEL;
+        MAX_THETA *= MAX_THETA_SCALE_FACTOR_PER_LEVEL;
+
         if (numObstacles > MAX_OBSTACLES)
             numObstacles = MAX_OBSTACLES;
         //Perserve the position, direction and other info about the player.
@@ -172,7 +172,7 @@ module Engine {
 
     /* Function for restarting the game after a Game over. */
     function restartGame() {
-        initialize(null);
+        initializeGameState(false);
     }
 
     /* Function for handling a game over event. */
@@ -192,12 +192,14 @@ module Engine {
     }
 
     /* Function for initializing the new GameState. */
-    function initializeGameState(){
+    function initializeGameState(forNewGame: boolean = true){
         gameState.paused = true;
-        var tmp;
-        tmp = randomStart();
-        gameState.player = new GamePlayer(tmp["pos"], 0, tmp["dir"]);
-        gameState.score = 0;
+        var initialPlayerData = randomStart();
+        gameState.player = new GamePlayer(initialPlayerData["pos"], 0, initialPlayerData["dir"]);
+        if (forNewGame) {
+            gameState.score = 0;
+            gameState.level = 1;
+        }
         gameState.obstacles = [];
         gameState.goal = null;
         initializeCollisionObjects();
@@ -275,7 +277,7 @@ module Engine {
 
         if (goalCandidates.length == 0)
             return null;
-        else 
+        else
             return goalCandidates[Math.floor(Math.random() * goalCandidates.length)];
     }
 
@@ -370,22 +372,6 @@ module Engine {
             delta = direction * Math.min(delta, DELTA_THETA * dt);
             player.curTheta += delta;
         }
-    }
-
-    //Check if the given position (in fine grid) has collided with any obstacles.
-    function isCollided(pos: Point): boolean {
-        // var maxBound: number = WIDTH * COLLISION_SCALE;
-        // if (pos.x < 0 || pos.y < 0 || pos.x >= maxBound || pos.y >= maxBound) {
-        //     return true;
-        // }
-
-        // for (var i = 0; i < gameState.numPlayers; i++) {
-        //     if (gameState.players[i].isDead == false && obstacles[i][pointToString(pos)]) {
-        //         return true;
-        //     }
-        // }
-
-        return false;
     }
 
     //Given current and next positions, return the grids in between, excluding the starting pos.

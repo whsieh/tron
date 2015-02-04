@@ -146,13 +146,13 @@ module Graphics {
             geometry.faces.push(new THREE.Face3(2, 3, 4));
             geometry.faces.push(new THREE.Face3(3, 0, 4));
 
-            var wireframeMaterial = new THREE.MeshBasicMaterial({ 
+            var wireframeMaterial = new THREE.MeshBasicMaterial({
                 color: 0x00FF00,
                 shading: THREE.FlatShading,
                 wireframe: true,
                 wireframeLinewidth: 4
             });
-            var hiddenMaterial = new THREE.MeshBasicMaterial({ 
+            var hiddenMaterial = new THREE.MeshBasicMaterial({
                 color: 0x007700,
                 shading: THREE.FlatShading,
             });

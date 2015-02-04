@@ -39,6 +39,7 @@ module Data {
         obstacles: MapObject[];
         goal: MapObject;
         score: number;                          //Number of times the game is won.
+        level: number;                          // Level counter.
         paused: boolean;
     }
 }
