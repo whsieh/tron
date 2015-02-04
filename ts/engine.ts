@@ -16,20 +16,27 @@ module Engine {
     import PLAYER_WIDTH = Data.PLAYER_WIDTH;
 
     /* Constants */
-    var TIMESTEP: number = 30;                  //Each logical time step is 30 milliseconds
-    var SPEED: number = 1.6 / TIMESTEP;         //The speed of all player in map unit per millisecond.
-    var DELTA_THETA: number = Util.degreeToRadian(0.5) / TIMESTEP;   //Turning speed in radian per millisecond.
-    var MAX_THETA: number = Util.degreeToRadian(3);                          //The maximum radian a player can turn.
+    var TIMESTEP: number = 30;                                          //Each logical time step is 30 milliseconds
+    var SPEED: number = 1.6 / TIMESTEP;                                 //The speed of all player in map unit per millisecond.
+    var DELTA_THETA: number = Util.degreeToRadian(0.5) / TIMESTEP;      //Turning speed in radian per millisecond.
+    var MAX_THETA: number = Util.degreeToRadian(3);                     //The maximum radian a player can turn.
     var Z_AXIS: Vector3 = new Vector3(0, 0, 1);
-    var MAX_OBSTACLES: number = 250;
+    var MAX_STATIC_OBSTACLES: number = 70;
+    var MAX_FLOATING_OBSTACLES: number = 20;
     var SPEED_SCALE_FACTOR_PER_LEVEL: number = 1.25;
     var MAX_THETA_SCALE_FACTOR_PER_LEVEL: number = 1.1;
+
+    var FLOATING_OBSTACLE_SPEED: number = 2 / TIMESTEP;
+    var FLOATING_OBSTACLE_MAX_HEIGHT: number = 50;
+    var FLOATING_OBSTACLE_COLLISION_THRESHOLD: number = 12;
 
     /* Global variables */
     var gameState: GameState = new GameState();
     var graphicEngine: Graphics.Engine = null;
     var collisionObjects: CollisionObject[][];
-    var numObstacles: number;
+    var floatingObstacles: FloatingObstacle[];
+    var numStaticObstacles: number;
+    var numFloatingObstacles: number;
     var startTimestamp: number = null;
 
     /* Interfaces and classes */
@@ -68,6 +75,7 @@ module Engine {
 
     class Obstacle implements CollisionObject {
         pos: Point;
+        color: number = 0xFF0000;
 
         constructor(pos: Point) {
             this.pos = pos;
@@ -80,6 +88,14 @@ module Engine {
         handleCollision(player: GamePlayer) {
             updateScore(gameState.score - 25);
             gameOver();
+        }
+    }
+
+    class FloatingObstacle extends Obstacle {
+        isMovingUp: boolean;
+
+        canCollide(player: GamePlayer): boolean {
+            return this.pos.z < FLOATING_OBSTACLE_COLLISION_THRESHOLD;
         }
     }
 
@@ -102,7 +118,8 @@ module Engine {
     /* Function to initialize a Tron game. */
     export function initialize(gameCanvas: HTMLCanvasElement) {
         startTimestamp = null;
-        numObstacles = 20;
+        numStaticObstacles = 20;
+        numFloatingObstacles = 5;
         initializeGameState();
         if (graphicEngine == null)
             graphicEngine = new Graphics.Engine(gameState, gameCanvas);
@@ -131,6 +148,19 @@ module Engine {
 
             updateDir(player, dt);
             player.nextPos = move(player, dt);
+
+            // Moving floating obstacles
+            for (var i = 0; i < floatingObstacles.length; i++) {
+                var floatingObstacle = floatingObstacles[i];
+                floatingObstacle.pos.z += (floatingObstacle.isMovingUp ? FLOATING_OBSTACLE_SPEED * dt : -FLOATING_OBSTACLE_SPEED * dt);
+                if (floatingObstacle.pos.z > FLOATING_OBSTACLE_MAX_HEIGHT) {
+                    floatingObstacle.pos.z = FLOATING_OBSTACLE_MAX_HEIGHT;
+                    floatingObstacle.isMovingUp = false;
+                } else if (floatingObstacle.pos.z < 0) {
+                    floatingObstacle.pos.z = 0;
+                    floatingObstacle.isMovingUp = true;
+                }
+            }
 
             var hitbox = player.getHitBox();
             for (var i = 0; i < hitbox.length; i++) {
@@ -164,12 +194,16 @@ module Engine {
     function nextLevel() {
         updateScore(gameState.score + 100);
         updateLevel(gameState.level + 1);
-        numObstacles += 25;
+        gameState.level++;
+        numStaticObstacles += 20;
+        numFloatingObstacles += 5;
         SPEED *= SPEED_SCALE_FACTOR_PER_LEVEL;
         MAX_THETA *= MAX_THETA_SCALE_FACTOR_PER_LEVEL;
 
-        if (numObstacles > MAX_OBSTACLES)
-            numObstacles = MAX_OBSTACLES;
+        if (numStaticObstacles > MAX_STATIC_OBSTACLES)
+            numStaticObstacles = MAX_STATIC_OBSTACLES;
+        if (numFloatingObstacles > MAX_FLOATING_OBSTACLES)
+            numFloatingObstacles = MAX_FLOATING_OBSTACLES
         //Perserve the position, direction and other info about the player.
         gameState.obstacles = [];
         gameState.goal = null;
@@ -230,13 +264,31 @@ module Engine {
         }
         var occupied: Point[] = getSurroundingPoints(mapToCollision(player.curPos));
 
-        //Create the obstacles
-        for (var i = 0; i < numObstacles; i++) {
+        //Create the static obstacles
+        for (var i = 0; i < numStaticObstacles; i++) {
             var p = getRandomPoint(occupied);
             occupied.push(p);
-            var obstacle = new Obstacle(collisionToMap(p));
+            var obstaclePos = collisionToMap(p);
+            obstaclePos.z = 0;
+            var obstacle = new Obstacle(obstaclePos);
+            obstacle.color = 0xFF0000;
             collisionObjects[p.x][p.y] = obstacle;
             gameState.obstacles.push(obstacle);
+        }
+
+        // Create the floating obstacles
+        floatingObstacles = new Array<FloatingObstacle>();
+        for (var i = 0; i < numFloatingObstacles; i++) {
+            var p = getRandomPoint(occupied);
+            occupied.push(p);
+            var obstaclePos = collisionToMap(p);
+            obstaclePos.z = Math.floor(Math.random() * FLOATING_OBSTACLE_MAX_HEIGHT);
+            var floatingObstacle = new FloatingObstacle(obstaclePos);
+            floatingObstacle.isMovingUp = !!Math.floor(Math.random() * 2);
+            floatingObstacle.color = 0xFF8000;
+            collisionObjects[p.x][p.y] = floatingObstacle;
+            gameState.obstacles.push(floatingObstacle);
+            floatingObstacles.push(floatingObstacle);
         }
 
         //Create goal

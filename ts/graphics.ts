@@ -27,6 +27,8 @@ module Graphics {
         // Render state
         private player: any;
         private hiddenPlayer: any;
+        private obstacles: any;
+        private hiddenObstacles: any;
         private goal: any;
         private hiddenGoal: any;
 
@@ -71,31 +73,37 @@ module Graphics {
 
             var geometry = new THREE.BoxGeometry(obstacleWidth, obstacleDepth, OBSTACLE_HEIGHT);
 
-            var wireframeMaterial = new THREE.MeshBasicMaterial({
-                color: 0xFF0000,
-                shading: THREE.FlatShading,
-                wireframe: true,
-                wireframeLinewidth: 2
-            });
             var hiddenMaterial = new THREE.MeshBasicMaterial({
                 color: 0x000000,
                 shading: THREE.FlatShading,
             });
 
+            this.obstacles = new Array();
+            this.hiddenObstacles = new Array();
             for (var i = 0; i < this.state.obstacles.length; i++) {
                 var obstaclePos  = this.state.obstacles[i].pos;
+                
+                var wireframeMaterial = new THREE.MeshBasicMaterial({
+                    color: this.state.obstacles[i].color,
+                    shading: THREE.FlatShading,
+                    wireframe: true,
+                    wireframeLinewidth: 2
+                });
 
                 var obstacle = new THREE.Mesh(geometry, wireframeMaterial);
                 obstacle.position.x = obstaclePos.x + obstacleWidth / 2;
                 obstacle.position.y = obstaclePos.y + obstacleWidth / 2;
-                obstacle.position.z = OBSTACLE_HEIGHT / 2;
+                obstacle.position.z = obstaclePos.z + OBSTACLE_HEIGHT / 2;
                 this.scene.add(obstacle);
 
                 var hiddenObstacle = new THREE.Mesh(geometry, hiddenMaterial)
                 hiddenObstacle.position.x = obstaclePos.x + obstacleWidth / 2;
                 hiddenObstacle.position.y = obstaclePos.y + obstacleWidth / 2;
-                hiddenObstacle.position.z = OBSTACLE_HEIGHT / 2;
+                hiddenObstacle.position.z = obstaclePos.z + OBSTACLE_HEIGHT / 2;
                 this.scene.add(hiddenObstacle)
+
+                this.obstacles.push(obstacle);
+                this.hiddenObstacles.push(hiddenObstacle);
             }
         }
 
@@ -227,6 +235,7 @@ module Graphics {
         public render(): void {
             this.setupCamera();
             this.setupPlayer();
+            this.setupObstacles();
 
             this.renderer.render(this.scene, this.camera);
         }
@@ -273,6 +282,25 @@ module Graphics {
                 PLAYER_HEIGHT + HOVER_HEIGHT - 8
                 )
             );
+        }
+
+        private setupObstacles() : void {
+            var obstacleWidth = Data.WIDTH / Data.GRID_WIDTH;
+            var obstacleDepth = Data.HEIGHT / Data.GRID_HEIGHT;
+
+            for (var i = 0; i < this.obstacles.length; i++) {
+                var obstacle = this.obstacles[i];
+                var hiddenObstacle = this.hiddenObstacles[i];
+                var obstaclePos  = this.state.obstacles[i].pos;
+
+                obstacle.position.x = obstaclePos.x + obstacleWidth / 2;
+                obstacle.position.y = obstaclePos.y + obstacleWidth / 2;
+                obstacle.position.z = obstaclePos.z + OBSTACLE_HEIGHT / 2;
+
+                hiddenObstacle.position.x = obstaclePos.x + obstacleWidth / 2;
+                hiddenObstacle.position.y = obstaclePos.y + obstacleWidth / 2;
+                hiddenObstacle.position.z = obstaclePos.z + OBSTACLE_HEIGHT / 2;
+            }
         }
 
         private setupCamera(): void {

@@ -13,6 +13,7 @@ module Data {
     export interface Point {
         x: number;
         y: number;
+        z?: number;
     }
 
     export class Player {
@@ -31,7 +32,8 @@ module Data {
 
     /* Objects on the map that the player can interact with. Each occupies an entire grid. */
     export interface MapObject {
-        pos: Point;                             //The bottom left corner of the object.
+        pos: Point;                             // The bottom left corner of the object, as well as its height
+        color?: number;
     }
 
     export class GameState {
