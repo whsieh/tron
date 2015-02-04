@@ -168,7 +168,7 @@ module Engine {
             var hitbox = player.getHitBox();
             for (var i = 0; i < hitbox.length; i++) {
                 if (!isInBound(hitbox[i]))
-                    updateScore(Math.max(0, gameState.score - (timestamp / 10000)));
+                    updateScore(gameState.score - (timestamp / 10000));
 
                 var p = mapToCollision(hitbox[i]);
                 if (!isInBound(p, GRID_WIDTH, GRID_HEIGHT, 0))
@@ -185,6 +185,7 @@ module Engine {
     }
 
     function updateScore(score: number) {
+        score = Math.max(0, score);
         gameState.score = score;
         document.getElementById("score-display").textContent = "Score: " + String(Math.round(score));
     }
