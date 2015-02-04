@@ -78,6 +78,7 @@ module Engine {
         }
 
         handleCollision(player: GamePlayer) {
+            updateScore(gameState.score - 25);
             gameOver();
         }
     }
@@ -134,7 +135,8 @@ module Engine {
             var hitbox = player.getHitBox();
             for (var i = 0; i < hitbox.length; i++) {
                 if (!isInBound(hitbox[i]))
-                    continue;
+                    updateScore(Math.max(0, gameState.score - (timestamp / 10000)));
+
                 var p = mapToCollision(hitbox[i]);
                 if (!isInBound(p, GRID_WIDTH, GRID_HEIGHT, 0))
                     continue;
@@ -149,9 +151,19 @@ module Engine {
         requestAnimationFrame(step);
     }
 
+    function updateScore(score: number) {
+        gameState.score = score;
+        document.getElementById("score-display").textContent = "Score: " + String(Math.round(score));
+    }
+
+    function updateLevel(level: number) {
+        gameState.level = level;
+        document.getElementById("level-display").textContent = "Level: " + String(level);
+    }
+
     function nextLevel() {
-        gameState.score += 100;
-        gameState.level++;
+        updateScore(gameState.score + 100);
+        updateLevel(gameState.level + 1);
         numObstacles += 25;
         SPEED *= SPEED_SCALE_FACTOR_PER_LEVEL;
         MAX_THETA *= MAX_THETA_SCALE_FACTOR_PER_LEVEL;
@@ -197,8 +209,8 @@ module Engine {
         var initialPlayerData = randomStart();
         gameState.player = new GamePlayer(initialPlayerData["pos"], 0, initialPlayerData["dir"]);
         if (forNewGame) {
-            gameState.score = 0;
-            gameState.level = 1;
+            updateScore(0);
+            updateLevel(1);
         }
         gameState.obstacles = [];
         gameState.goal = null;

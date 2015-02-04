@@ -70,7 +70,7 @@ module Coordinator {
                 renderCameraOverlay(context);
                 context.save();
                 context.fillStyle = "#FF0000";
-                context.font = cameraOverlayFontSize + "px serif";
+                context.font = cameraOverlayFontSize + "px Open Sans";
                 context.fillText("Press any key to begin capture.",
                     skinCaptureRegionLeft,
                     skinCaptureRegionTop + skinCaptureRegionHeight + cameraOverlayFontSize + 4);
@@ -101,7 +101,7 @@ module Coordinator {
                     renderCameraOverlay(context);
                     context.save();
                     context.fillStyle = "#FF0000";
-                    context.font = cameraCountdownFontSize + "px serif";
+                    context.font = cameraCountdownFontSize + "px Open Sans";
                     context.fillText(String(Math.round((captureDelay - timeInMSSinceCaptureBegan) / 1000)),
                         skinCaptureRegionLeft + skinCaptureRegionWidth,
                         skinCaptureRegionTop + skinCaptureRegionHeight + cameraCountdownFontSize + 4);
