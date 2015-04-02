@@ -2,10 +2,7 @@
 .DS_Store
 
 # Compiled Files
-build/*
 node_modules/*
-public/js/*
-public/css/*
 
 # Sublime workspace
 *.sublime-workspace
