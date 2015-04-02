@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Tron</title>
+    <!-- Libraries -->
+    <script src="lib/jquery.min.js"></script>
+    <script src="lib/three.min.js"></script>
+    <script src="lib/underscore.js"></script>
+    <script src="lib/Queue.js"></script>
+    <script src="//cdn.jsdelivr.net/velocity/1.2.1/velocity.min.js"></script>
+    <script src="lib/google-analytics.js"></script>
+    <!-- Tron script -->
+    <script src="js/tron.js"></script>
+
+    <link rel="stylesheet" href="css/style.css">
+    <link href='http://fonts.googleapis.com/css?family=Open+Sans' rel='stylesheet' type='text/css'>
+
+    <script>
+      $(window).on("load", function() {
+        // Constants
+        var $container = $(".container");
+        var $svg = $("svg");
+        var $mainScreen = $(".main_screen");
+        var $setupScreen = $(".setup_screen");
+        var $rightScreen = $(".right_screen");
+        var $leftScreen = $(".left_screen");
+        var $wheel = $("#wheel");
+
+        var smallScreenSize = { width: 250, height: 190 }
+        var largeScreenSize = { width: 730, height: 510 }
+
+        // Sizing on load
+        var svgHeight = Math.min(window.innerWidth / 2, window.innerHeight)
+        var svgWidth = svgHeight * 2
+        $svg.css({ transform: "scale(" + svgHeight / 700 + ")" })
+        $container.width(svgWidth).height(svgHeight);
+
+        // Create video element and canvases
+        $mainScreen.attr({
+          id: "game_canvas",
+          width: largeScreenSize.width,
+          height: largeScreenSize.height
+        }).width(largeScreenSize.width).height(largeScreenSize.height).hide();
+
+        $setupScreen.attr({
+          id: "setup_canvas",
+          width: largeScreenSize.width,
+          height: largeScreenSize.height
+        }).width(largeScreenSize.width).height(largeScreenSize.height);
+
+        $leftScreen.attr({
+          id: "webcam_canvas",
+          width: smallScreenSize.width,
+          height: smallScreenSize.height
+        }).width(smallScreenSize.width).height(smallScreenSize.height);
+
+        $rightScreen.attr({
+          id: "debug_canvas",
+          width: smallScreenSize.width,
+          height: smallScreenSize.height
+        }).width(smallScreenSize.width).height(smallScreenSize.height);
+
+        $("body").append(
+          $("<video />").attr({
+            id: "webcam_video",
+            width: smallScreenSize.width,
+            height: smallScreenSize.height
+          })
+        );
+
+        // Setup Tron
+        var tron = Coordinator.create("webcam_video", "setup_canvas", "webcam_canvas", "game_canvas", "debug_canvas");
+        tron.setLargeScreenDimensions(largeScreenSize.width, largeScreenSize.height);
+        tron.setSmallScreenDimensions(smallScreenSize.width, smallScreenSize.height);
+        tron.initialize();
+        tron.setSkinCaptureRegion(Math.round(largeScreenSize.width / 3),
+          Math.round(largeScreenSize.height / 3),
+          Math.round(largeScreenSize.width / 3),
+          Math.round(largeScreenSize.height / 3));
+        $(window).keypress(function() {
+          tron.captureSkinColorAfterDelay(3000);
+        });
+
+        // Check steering angle periodically
+        window.setInterval(function() {
+          $wheel.velocity("stop").velocity({rotateZ: - tron.getSteeringAngle() * 180 / Math.PI + "deg"}, 25);
+        }, 30);
+      });
+
+    </script>
+
+</head>
+<body>
+  <div class="container">
+    <svg version="1.1" id="bg" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
+       width="1400px" height="700px" viewBox="0 0 1400 700" enable-background="new 0 0 1400 700" xml:space="preserve">
+    <g id="dashboard">
+      <polygon fill="#0D0C1C" points="203.621,698 300.621,601 1099.379,601 1196.379,698   "/>
+      <path fill="#18CAE6" d="M1098.758,603l94,94H207.243l94-94H1099 M1100,600H300L200,700h1000L1100,600L1100,600z"/>
+    </g>
+    <g id="main_tv">
+      <g>
+        <path fill="#0D0C1C" d="M1080,20v560H320V20H1080 M1100,0H300v600h800V0L1100,0z"/>
+      </g>
+      <polygon fill="#3D3D49" points="1045,50 355,50 320,20 1080,20   "/>
+      <polygon fill="#CFCED2" points="335,560 1065,560 1080,580 320,580   "/>
+      <polygon fill="#9E9EA4" points="335,560 320,580 320,20 355,50   "/>
+      <polygon fill="#9E9EA4" points="1065,560 1080,580 1080,20 1045,50   "/>
+      <g id="_x3C_Path_x3E__2_">
+        <path fill="#0D0C1C" d="M1040.192,55l19.607,500H340.2l19.607-500H1040 M1045,50H355l-20,510h730L1045,50L1045,50z"/>
+      </g>
+    </g>
+    <g id="left_tv">
+      <rect x="20" y="414" fill="#0D0C1C" width="260" height="35"/>
+      <rect x="33" y="449" width="232" height="4"/>
+      <path fill="#808080" d="M100,496.23c0,3.187-2.239,5.77-5,5.77H80c-2.761,0-5-2.583-5-5.77V477.77c0-3.187,2.239-5.77,5-5.77h15
+        c2.761,0,5,2.583,5,5.77V496.23z"/>
+      <path fill="#808080" d="M225,496.23c0,3.187-2.239,5.77-5,5.77h-15c-2.761,0-5-2.583-5-5.77V477.77c0-3.187,2.239-5.77,5-5.77h15
+        c2.761,0,5,2.583,5,5.77V496.23z"/>
+      <rect x="15" y="452" fill="#754C24" width="270" height="25"/>
+      <g id="_x3C_Path_x3E__1_">
+        <path fill="#0D0C1C" d="M275,220v190H25V220H275 M280,215h-5H25h-5v5v190v5h5h250h5v-5V220V215L280,215z"/>
+      </g>
+    </g>
+    <g id="left_tv_1_">
+      <rect x="1120" y="414" fill="#0D0C1C" width="260" height="35"/>
+      <rect x="1133" y="449" width="232" height="4"/>
+      <path fill="#808080" d="M1200,496.23c0,3.187-2.238,5.77-5,5.77h-15c-2.762,0-5-2.583-5-5.77V477.77c0-3.187,2.238-5.77,5-5.77h15
+        c2.762,0,5,2.583,5,5.77V496.23z"/>
+      <path fill="#808080" d="M1325,496.23c0,3.187-2.238,5.77-5,5.77h-15c-2.762,0-5-2.583-5-5.77V477.77c0-3.187,2.238-5.77,5-5.77h15
+        c2.762,0,5,2.583,5,5.77V496.23z"/>
+      <rect x="1115" y="452" fill="#754C24" width="270" height="25"/>
+      <g id="_x3C_Path_x3E__3_">
+        <path fill="#0D0C1C" d="M1375,220v190h-250V220H1375 M1380,215h-5h-250h-5v5v190v5h5h250h5v-5V220V215L1380,215z"/>
+      </g>
+    </g>
+    <g id="wheel">
+      <path fill="#7D98A3" d="M705.514,543.779c-58.153-0.359-105.535,34.979-105.836,78.931c-0.299,43.961,46.613,79.912,104.786,80.287
+        c58.185,0.375,105.595-34.981,105.874-78.959C810.617,580.07,763.677,544.139,705.514,543.779z M705.382,563.675
+        c34.275,0.212,63.126,17.075,73.907,40.263l-148.323-0.93C642.055,579.962,671.109,563.462,705.382,563.675z M704.922,633.324
+        c-7.274-0.044-13.135-4.534-13.1-10.034c0.036-5.5,5.959-9.914,13.233-9.868c7.279,0.046,13.137,4.533,13.1,10.036
+        C718.118,628.958,712.201,633.371,704.922,633.324z M626.002,622.874c35.968,0.228,64.931,26.612,65.324,59.117
+        C654.127,676.933,625.803,652.356,626.002,622.874z M717.873,682.16c0.831-32.497,30.14-58.516,66.123-58.29
+        C783.808,653.362,755.147,677.579,717.873,682.16z"/>
+    </g>
+    <path id="left_button" fill="#7D98A3" d="M935.809,648.77c1.433,9.174-5.543,16.76-15.373,16.198
+      c-9.486-0.542-16.936-8.471-16.936-17.055c0-7.924,6.431-13.913,14.583-13.913C926.49,634,934.491,640.343,935.809,648.77z"/>
+    <path id="right_button" fill="#7D98A3" d="M997.507,648.413c1.41,9.148-5.295,16.617-14.771,16.065
+      c-9.152-0.531-16.543-8.358-16.769-16.938c-0.212-8.021,5.975-14.144,14.02-14.138C988.282,633.408,996.194,639.896,997.507,648.413
+      z"/>
+    <g id="decorations">
+      <path fill="none" stroke="#18CAE6" stroke-width="2" stroke-miterlimit="10" d="M1000.399,648.279
+        c1.643,10.825-6.305,19.642-17.502,18.992c-10.821-0.626-19.578-9.869-19.868-20.026c-0.272-9.518,7.057-16.797,16.608-16.79
+        C989.487,630.463,998.866,638.177,1000.399,648.279z"/>
+      <path fill="none" stroke="#18CAE6" stroke-width="2" stroke-miterlimit="10" d="M1180.667,683.166l-89.604-39.25l-78.44,36.376
+        l-5.642-15.274c5.508-3.234,6.937-12.268,6.114-19.725c-1.305-6.618-5.262-16.126-14.541-17.979L992.616,611l57.384,1l8.25,25.875
+        L1109.5,611"/>
+      <line fill="none" stroke="#18CAE6" stroke-width="2" stroke-miterlimit="10" x1="986.049" y1="666.833" x2="996.067" y2="699.5"/>
+
+        <line fill="none" stroke="#18CAE6" stroke-width="2" stroke-miterlimit="10" x1="916.699" y1="630.647" x2="912.152" y2="600.648"/>
+
+        <line fill="none" stroke="#18CAE6" stroke-width="2" stroke-miterlimit="10" x1="966.547" y1="601.453" x2="975.041" y2="630.563"/>
+      <polyline fill="none" stroke="#18CAE6" stroke-width="2" stroke-miterlimit="10" points="861.49,698.48 878.277,665.68
+        898.294,698.48  "/>
+      <g>
+        <path fill="#18CAE6" d="M327.955,627.338l1.953-1.362l13.184,0.031l0.586,1.369l-4.145,8.47l-1.96,1.396l-13.38-0.028l-0.56-1.404
+          L327.955,627.338z M325.983,635.175l11.842,0.026l3.544-7.203l-11.731-0.028L325.983,635.175z M402.983,626.153
+          c1.708,0.005,3.171,0.348,4.394,1.034c1.224,0.687,2.195,1.537,2.914,2.549c0.718,1.016,1.115,2.177,1.188,3.484
+          c0.073,1.313-0.203,2.708-0.825,4.183l-56.697-0.124c-0.656-0.001-1.13,0.311-1.424,0.934l-13.305,28.239l-2.098,1.512
+          l-9.451-0.014l-0.589-1.517l14.476-29.767c0.68-1.398,1.699-2.743,3.056-4.033c1.352-1.287,2.788-2.415,4.309-3.388
+          c1.518-0.969,2.977-1.745,4.382-2.332c1.401-0.584,2.596-0.876,3.584-0.873L402.983,626.153z M408.812,635.359
+          c0.202-0.502,0.245-1.093,0.134-1.77c-0.113-0.674-0.445-1.445-0.996-2.311c-0.548-0.862-1.253-1.571-2.115-2.127
+          c-0.859-0.554-2.217-0.891-4.072-1.01l-44.665-0.106c-1.601-0.005-3.117,0.336-4.55,1.02c-1.437,0.685-2.866,1.551-4.292,2.605
+          c-1.429,1.056-2.518,2.058-3.264,3.004c-0.748,0.948-1.328,1.851-1.743,2.709l-13.723,28.372l7.864,0.013l13.138-27.725
+          c0.13-0.273,0.35-0.576,0.662-0.907c0.31-0.33,0.646-0.632,1.005-0.904c0.36-0.269,0.73-0.502,1.111-0.696
+          c0.379-0.191,0.744-0.289,1.09-0.288L408.812,635.359z M365.311,642.131l1.919-1.415l9.176,0.019l0.657,1.421l-10.644,24.34
+          l-1.984,1.511l-9.5-0.015l-0.639-1.515L365.311,642.131z M356.708,665.789l7.915,0.013l10.118-22.999l-7.687-0.017
+          L356.708,665.789z M409.303,640.806c-0.538,1.061-1.104,1.998-1.696,2.807c-0.595,0.811-1.357,1.702-2.291,2.676
+          c-0.936,0.977-2.044,1.894-3.327,2.754c-1.286,0.861-2.785,1.614-4.495,2.256c-1.714,0.643-3.595,1.065-5.64,1.264l7.612,13.042
+          l-0.974,2.454l-13.509-0.021l-9.229-18.051l3.401-7.827l1.894-1.415L409.303,640.806z M378.098,649.328l8.875,16.508l9.58,0.016
+          l-8.7-15.419l4.406,0.008c2.297-0.156,4.282-0.626,5.949-1.405c1.666-0.779,3.1-1.647,4.303-2.603
+          c1.42-1.11,2.519-2.301,3.297-3.566l-24.897-0.051L378.098,649.328z"/>
+        <path fill="#18CAE6" d="M408.247,646.564c1.129-2.859,2.739-5.539,4.826-8.043c2.073-2.488,4.368-4.631,6.888-6.437
+          c2.507-1.795,5.197-3.219,8.073-4.278c2.866-1.056,5.718-1.579,8.56-1.571c2.802,0.006,5.253,0.543,7.356,1.608
+          c2.107,1.071,3.751,2.506,4.932,4.308c1.184,1.812,1.896,3.961,2.134,6.452c0.239,2.506-0.127,5.187-1.104,8.042
+          c-0.997,2.919-2.498,5.677-4.506,8.268c-2.021,2.608-4.311,4.885-6.867,6.82c-2.569,1.948-5.365,3.496-8.384,4.641
+          c-3.029,1.148-6.026,1.723-8.983,1.718c-2.999-0.004-5.581-0.587-7.741-1.743c-2.155-1.155-3.799-2.709-4.933-4.664
+          c-1.128-1.944-1.74-4.227-1.838-6.843C406.561,652.245,407.093,649.482,408.247,646.564z M410.349,646.567
+          c-1.004,2.561-1.468,5.016-1.385,7.365c0.083,2.363,0.646,4.423,1.691,6.174c1.049,1.761,2.549,3.163,4.503,4.206
+          c1.957,1.048,4.253,1.573,6.885,1.577c2.631,0.005,5.321-0.515,8.065-1.552c2.736-1.037,5.286-2.432,7.648-4.185
+          c2.35-1.745,4.436-3.799,6.257-6.157c1.809-2.344,3.152-4.795,4.033-7.353c0.875-2.541,1.21-4.947,1.013-7.225
+          c-0.197-2.263-0.852-4.213-1.961-5.856c-1.105-1.638-2.619-2.934-4.542-3.895c-1.92-0.956-4.13-1.438-6.637-1.443
+          c-2.507-0.008-5.061,0.464-7.662,1.409c-2.611,0.951-5.06,2.239-7.35,3.869c-2.301,1.637-4.383,3.584-6.247,5.843
+          C412.784,641.619,411.345,644.026,410.349,646.567z M417.942,646.881c0.594-1.551,1.438-2.997,2.532-4.339
+          c1.091-1.338,2.325-2.504,3.707-3.498c1.376-0.994,2.847-1.781,4.411-2.361c1.561-0.577,3.089-0.865,4.585-0.863
+          c1.496,0.005,2.817,0.3,3.969,0.884c1.153,0.586,2.051,1.377,2.695,2.374c0.646,1,1.03,2.169,1.154,3.508
+          c0.124,1.343-0.087,2.79-0.636,4.342c-0.551,1.558-1.373,3.02-2.463,4.387c-1.095,1.372-2.338,2.576-3.729,3.608
+          c-1.396,1.037-2.901,1.853-4.514,2.444c-1.617,0.591-3.195,0.884-4.735,0.882c-1.54-0.003-2.891-0.303-4.05-0.899
+          c-1.158-0.595-2.052-1.414-2.683-2.454c-0.63-1.038-0.975-2.246-1.04-3.62C417.079,649.905,417.346,648.44,417.942,646.881z
+           M419.986,646.887c-0.486,1.277-0.69,2.46-0.613,3.545c0.076,1.089,0.376,2.06,0.9,2.912c0.524,0.853,1.256,1.525,2.193,2.016
+          c0.94,0.491,2.041,0.739,3.301,0.741c1.22,0.002,2.482-0.241,3.781-0.729c1.298-0.486,2.533-1.155,3.703-2.005
+          c1.167-0.848,2.19-1.816,3.07-2.903c0.874-1.084,1.54-2.264,1.996-3.542c0.454-1.272,0.628-2.443,0.526-3.514
+          c-0.104-1.065-0.432-2.011-0.985-2.838c-0.552-0.823-1.288-1.479-2.208-1.971c-0.919-0.49-1.975-0.736-3.167-0.739
+          c-1.231-0.002-2.485,0.238-3.764,0.724c-1.281,0.486-2.49,1.139-3.628,1.96c-1.142,0.823-2.157,1.766-3.044,2.83
+          C421.157,644.442,420.47,645.612,419.986,646.887z"/>
+        <path fill="#18CAE6" d="M445.084,668.129l-0.803-1.513l13.263-38.967l1.713-1.359l4.598,0.012l9.256,16.468l-2.02,6.436
+          l-1.742,1.443l-7.847-0.015l-5.206,16.001l-1.81,1.508L445.084,668.129z M454.431,665.942l5.713-17.418l9.11,0.018l1.584-5.008
+          l-8.271-15.247l-3.245-0.007l-12.716,37.649L454.431,665.942z M497.829,626.384l0.856,1.365l-11.156,38.934l-1.748,1.508
+          l-4.845-0.007l-9.715-17.532l2.022-6.459l1.72-1.42l7.764,0.018l4.542-15.068l1.658-1.359L497.829,626.384z M489.072,628.352
+          l-4.936,16.516l-9.063-0.018l-1.558,5.021l8.725,16.114l3.399,0.005l10.878-37.621L489.072,628.352z"/>
+      </g>
+      <polyline fill="none" stroke="#18CAE6" stroke-width="2" stroke-miterlimit="10" points="250.747,698.789 271.376,676 540,676
+        507.259,602.208   "/>
+      <path fill="none" stroke="#18CAE6" stroke-width="2" stroke-miterlimit="10" d="M938.774,648.635
+        c1.697,10.868-6.566,19.854-18.212,19.189c-11.238-0.643-20.063-10.035-20.063-20.204c0-9.387,7.618-16.481,17.275-16.481
+        C927.735,631.139,937.214,638.652,938.774,648.635z"/>
+
+        <line fill="none" stroke="#18CAE6" stroke-width="2" stroke-miterlimit="10" x1="921.929" y1="668.234" x2="927.833" y2="699.396"/>
+      <polyline fill="none" stroke="#18CAE6" stroke-width="2" stroke-miterlimit="10" points="600,699.5 584.333,670 561.333,670
+        540.167,625.667 559.333,600   "/>
+      <polyline fill="none" stroke="#18CAE6" stroke-width="2" stroke-miterlimit="10" points="810.666,699.5 826.333,670 849.333,670
+        870.499,625.667 851.333,600   "/>
+    </g>
+    </svg>
+
+    <svg version="1.1" id="canvas" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
+       width="1400px" height="700px" viewBox="0 0 1400 700" enable-background="new 0 0 1400 700" xml:space="preserve">
+      <foreignObject x="24" y="219" width="250" height="250">
+        <body xmlns="http://www.w3.org/1999/xhtml">
+          <canvas class="left_screen"></canvas>
+        </body>
+      </foreignObject>
+      <foreignObject x="335" y="49.5" width="730" height="510">
+        <body xmlns="http://www.w3.org/1999/xhtml">
+          <canvas class="main_screen"></canvas>
+          <canvas class="setup_screen"></canvas>
+          <div id="game_overlay">
+            <span id="level-display"></span>
+            <br>
+            <span id="score-display"></span>
+          </div>
+        </body>
+      </foreignObject>
+      <foreignObject x="1124" y="219" width="250" height="250">
+        <body xmlns="http://www.w3.org/1999/xhtml">
+          <canvas class="right_screen"></canvas>
+        </body>
+      </foreignObject>
+    </svg>
+  </div>
+</body>
+</html>
