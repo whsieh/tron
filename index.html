@@ -73,10 +73,10 @@
         tron.setLargeScreenDimensions(largeScreenSize.width, largeScreenSize.height);
         tron.setSmallScreenDimensions(smallScreenSize.width, smallScreenSize.height);
         tron.initialize();
-        tron.setSkinCaptureRegion(Math.round(largeScreenSize.width / 3),
-          Math.round(largeScreenSize.height / 3),
-          Math.round(largeScreenSize.width / 3),
-          Math.round(largeScreenSize.height / 3));
+        tron.setSkinCaptureRegion(Math.round(largeScreenSize.width * 0.4),
+          Math.round(largeScreenSize.height * 0.4),
+          Math.round(largeScreenSize.width / 5),
+          Math.round(largeScreenSize.height / 5));
         $(window).keypress(function() {
           tron.captureSkinColorAfterDelay(3000);
         });
