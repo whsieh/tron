@@ -115,8 +115,9 @@ module Util {
         private renderCameraOverlay: (context: CanvasRenderingContext2D) => void;
 
         constructor(video: HTMLVideoElement, canvas: HTMLCanvasElement, errorHandler: any) {
-            if (!hasGetUserMedia)
+            if (!hasGetUserMedia())
                 return errorHandler({name: "Unsupported"});
+
             getUserMedia({video: true}, bind(this, function(stream) {
                 this.video.src = URL.createObjectURL(stream);
             }), errorHandler);

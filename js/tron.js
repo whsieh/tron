@@ -82,8 +82,9 @@ var Util;
         function Camera(video, canvas, errorHandler) {
             this.isReady = false;
             this.isCapturing = false;
-            if (!hasGetUserMedia)
+            if (!hasGetUserMedia())
                 return errorHandler({ name: "Unsupported" });
+
             getUserMedia({ video: true }, bind(this, function (stream) {
                 this.video.src = URL.createObjectURL(stream);
             }), errorHandler);
