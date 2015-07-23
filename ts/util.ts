@@ -85,14 +85,15 @@ module Util {
 
     function hasGetUserMedia(): boolean {
         return !!(nav.getUserMedia || nav.webkitGetUserMedia ||
-            nav.mozGetUserMedia || nav.msGetUserMedia);
+            nav.mozGetUserMedia || nav.msGetUserMedia || nav.mediaDevices.getUserMedia);
     }
 
     function getUserMedia(constraints, streamHandler, errorHandler): any {
         (nav.getUserMedia ||
             nav.webkitGetUserMedia ||
             nav.mozGetUserMedia ||
-            nav.msGetUserMedia).call(nav, constraints, streamHandler, errorHandler);
+            nav.msGetUserMedia ||
+            nav.mediaDevices.getUserMedia).call(nav, constraints, streamHandler, errorHandler);
     }
 
     //============================================================

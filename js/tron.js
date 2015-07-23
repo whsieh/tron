@@ -71,11 +71,11 @@ var Util;
     var nav = navigator;
 
     function hasGetUserMedia() {
-        return !!(nav.getUserMedia || nav.webkitGetUserMedia || nav.mozGetUserMedia || nav.msGetUserMedia);
+        return !!(nav.getUserMedia || nav.webkitGetUserMedia || nav.mozGetUserMedia || nav.msGetUserMedia || nav.mediaDevices.getUserMedia);
     }
 
     function getUserMedia(constraints, streamHandler, errorHandler) {
-        (nav.getUserMedia || nav.webkitGetUserMedia || nav.mozGetUserMedia || nav.msGetUserMedia).call(nav, constraints, streamHandler, errorHandler);
+        (nav.getUserMedia || nav.webkitGetUserMedia || nav.mozGetUserMedia || nav.msGetUserMedia || nav.mediaDevices.getUserMedia).call(nav, constraints, streamHandler, errorHandler);
     }
 
     var Camera = (function () {
